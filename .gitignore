@@ -1,5 +1,7 @@
 # folders
 .idea
+dist
+node_modules
 
 # files
 *.bkp

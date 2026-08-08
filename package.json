@@ -1,0 +1,36 @@
+{
+  "name": "finalproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "makemigrations": "npx drizzle-kit generate",
+    "migrate": "npx drizzle-kit migrate",
+    "migrate-tenants": "tsx src/db/migrate-tenants.ts",
+    "create-tenant": "tsx src/db/queries/tenants/create-tenant.ts",
+    "start": "tsx ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raneemkhalil/FTS-finalproject.git"
+  },
+  "keywords": [],
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/raneemkhalil/FTS-finalproject/issues"
+  },
+  "homepage": "https://github.com/raneemkhalil/FTS-finalproject#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.2.0",
+    "drizzle-kit": "^0.31.10",
+    "express": "^5.2.1",
+    "tsx": "^4.23.11",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  }
+}

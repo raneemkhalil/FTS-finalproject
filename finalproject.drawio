@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="HsajIZsqrpmlUKEpPQ8H">
-    <mxGraphModel dx="694" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="496" dy="429" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -70,6 +70,13 @@
         <mxCell id="BllSFudeArZUFPEJDNgu-26" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.1;entryY=-0.029;entryDx=0;entryDy=0;entryPerimeter=0;" target="BllSFudeArZUFPEJDNgu-15">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="BllSFudeArZUFPEJDNgu-58" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1.02;entryY=0.351;entryDx=0;entryDy=0;entryPerimeter=0;" target="BllSFudeArZUFPEJDNgu-15" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="489.57" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="BllSFudeArZUFPEJDNgu-27" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="message content" vertex="1">
           <mxGeometry height="40" width="80" x="600" y="440" as="geometry" />
         </mxCell>
@@ -118,6 +125,15 @@
             <mxPoint x="380" y="572.5" as="sourcePoint" />
             <mxPoint x="440" y="572.5" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="BllSFudeArZUFPEJDNgu-60" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="expire date" vertex="1">
+          <mxGeometry height="40" width="80" x="600" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="BllSFudeArZUFPEJDNgu-61" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="BllSFudeArZUFPEJDNgu-60">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BllSFudeArZUFPEJDNgu-62" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.97;entryY=0.678;entryDx=0;entryDy=0;entryPerimeter=0;" target="BllSFudeArZUFPEJDNgu-15">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
