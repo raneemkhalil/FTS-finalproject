@@ -1,5 +1,5 @@
 import * as process from "node:process";
-import {migrateTenant} from "../../migrate-tenants.ts";
+import {migrateTenant} from "../../migrate-tenants";
 
 export async function createTenant(schemaName: string) {
     try {

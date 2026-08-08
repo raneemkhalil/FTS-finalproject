@@ -9,7 +9,6 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
     "types": ["node", "express"]
   },
   "include": ["./src/**/*.ts"],

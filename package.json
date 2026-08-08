@@ -8,7 +8,7 @@
     "migrate": "npx drizzle-kit migrate",
     "migrate-tenants": "tsx src/db/migrate-tenants.ts",
     "create-tenant": "tsx src/db/queries/tenants/create-tenant.ts",
-    "start": "tsx ./src/index.ts",
+    "server": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

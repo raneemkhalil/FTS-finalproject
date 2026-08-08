@@ -3,11 +3,11 @@ import path from "node:path";
 import * as fs from "node:fs";
 import {createHash} from "node:crypto";
 import postgres from "postgres";
-import {config} from "../config.ts";
+import {config} from "../config";
 import {drizzle} from "drizzle-orm/postgres-js";
-import * as schema from "./schema.ts";
+import * as schema from "./schema";
 import {eq, not, sql} from "drizzle-orm";
-import {tenants} from "./schema.ts";
+import {tenants} from "./schema";
 
 const DRIZZLE_STATEMENT_BREAKPOINT = "--> statement-breakpoint";
 const TENANT_MIGRATIONS_SCHEMA = "template";
