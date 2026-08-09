@@ -1,9 +1,15 @@
 import * as process from "node:process";
-import {migrateTenant} from "../../migrate-tenants";
+import { migrateEachTenant } from "../../scripts/migrate-schemas";
+import postgres from "postgres";
+import {config} from "../../../config";
+import {drizzle} from "drizzle-orm/postgres-js";
+import * as schema from "../../schema";
 
 export async function createTenant(schemaName: string) {
+    const conn = postgres(config.dbCredential)
+    const db = drizzle(conn, { schema })
     try {
-        await migrateTenant(schemaName)
+        await migrateEachTenant(db, schemaName)
         console.log(`Tenant created: name="${schemaName}", schema="${schemaName}"`);
     } catch (err) {
         console.error("Failed to create tenant:", err);

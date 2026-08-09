@@ -1,6 +1,6 @@
 {
-  "id": "d5bdb252-6b1f-40b5-b9b6-7c3fcc18c9da",
-  "prevId": "c7270c55-38d4-4790-8f2b-3e2be6a27209",
+  "id": "56689766-5d67-481f-806c-c92371f3f244",
+  "prevId": "a6c5ef7c-53ad-4e3e-aa4e-4926f2aa1514",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -33,13 +33,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "expire_date": {
-          "name": "expire_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now() + interval '7 days'"
-        },
         "message": {
           "name": "message",
           "type": "varchar(256)",
@@ -61,11 +54,11 @@
         }
       },
       "indexes": {
-        "time_idx": {
-          "name": "time_idx",
+        "logs_attribute_idx": {
+          "name": "logs_attribute_idx",
           "columns": [
             {
-              "expression": "time",
+              "expression": "attributes",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -73,7 +66,7 @@
           ],
           "isUnique": false,
           "concurrently": false,
-          "method": "btree",
+          "method": "gin",
           "with": {}
         }
       },
@@ -98,19 +91,13 @@
           "name": "logs_pk",
           "columns": [
             "user_id",
-            "request_id"
+            "request_id",
+            "time",
+            "service_name"
           ]
         }
       },
-      "uniqueConstraints": {
-        "logs_request_id_unique": {
-          "name": "logs_request_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "request_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "makemigrations": "npx drizzle-kit generate",
-    "migrate": "npx drizzle-kit migrate",
-    "migrate-tenants": "tsx src/db/migrate-tenants.ts",
+    "migrate-shared": "tsx src/db/scripts/migrate-shared.ts",
+    "migrate-schemas": "tsx src/db/scripts/migrate-schemas.ts",
     "create-tenant": "tsx src/db/queries/tenants/create-tenant.ts",
     "server": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"

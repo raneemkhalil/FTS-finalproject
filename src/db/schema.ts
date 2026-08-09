@@ -1,5 +1,16 @@
-import {pgSchema, timestamp, uuid, text, varchar, jsonb, index, primaryKey, pgTable} from "drizzle-orm/pg-core";
-import {sql} from "drizzle-orm";
+import {
+    pgSchema,
+    timestamp,
+    uuid,
+    text,
+    varchar,
+    jsonb,
+    index,
+    primaryKey,
+    pgTable,
+    uniqueIndex
+} from "drizzle-orm/pg-core";
+import {desc, sql} from "drizzle-orm";
 
 export const tenants = pgTable("tenants", {
     tenantId: uuid("tenant_id").primaryKey().notNull().defaultRandom(),
@@ -18,11 +29,11 @@ export function usersTable(tenant_name: string) {
 
 export function logsTable(tenant_name: string) {
     return pgSchema(tenant_name).table("logs", {
-        requestId: uuid("request_id").unique().notNull(),
+        requestId: uuid("request_id").notNull(),
         level: text("level").notNull(),
         serviceName: text("service_name").notNull(),
         time: timestamp("time").notNull().defaultNow().$onUpdate(() => new Date()),
-        expireDate: timestamp("expire_date").default(sql`now() + interval '7 days'`),
+        // expireDate: timestamp("expire_date").default(sql`now() + interval '7 days'`),
         message: varchar({length: 256}),
         attributes: jsonb("attributes").notNull().default(sql`'{}'::jsonb`),
         userId: uuid("user_id").references(() => {
@@ -30,8 +41,8 @@ export function logsTable(tenant_name: string) {
             return users.id
         }, { onDelete: "cascade" })
     }, (t) => [
-        index("time_idx").on(t.time),
-        primaryKey({name: "logs_pk", columns: [t.userId, t.requestId]})
+        index("logs_attribute_idx").using("gin", t.attributes),
+        primaryKey({name: "logs_pk", columns: [t.userId, t.requestId, t.time, t.serviceName]})
     ]);
 }
 

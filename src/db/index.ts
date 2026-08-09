@@ -5,3 +5,4 @@ import postgres from "postgres";
 
 const connection = postgres(config.dbCredential)
 export const db = drizzle(connection, { schema })
+export type dbType = typeof db
