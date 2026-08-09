@@ -25,7 +25,7 @@
         <mxCell id="BllSFudeArZUFPEJDNgu-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="APIs" vertex="1">
           <mxGeometry height="30" width="60" x="450" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="BllSFudeArZUFPEJDNgu-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="LOGS" vertex="1">
+        <mxCell id="BllSFudeArZUFPEJDNgu-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="REQLOGS" vertex="1">
           <mxGeometry height="60" width="120" x="470" y="470" as="geometry" />
         </mxCell>
         <mxCell id="BllSFudeArZUFPEJDNgu-9" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="USERS" vertex="1">
@@ -52,7 +52,7 @@
         <mxCell id="BllSFudeArZUFPEJDNgu-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="M" vertex="1">
           <mxGeometry height="30" width="60" x="390" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="BllSFudeArZUFPEJDNgu-24" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="time" vertex="1">
+        <mxCell id="BllSFudeArZUFPEJDNgu-24" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="&lt;u&gt;time&lt;/u&gt;" vertex="1">
           <mxGeometry height="30" width="80" x="380" y="400" as="geometry" />
         </mxCell>
         <mxCell id="BllSFudeArZUFPEJDNgu-26" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.1;entryY=-0.029;entryDx=0;entryDy=0;entryPerimeter=0;">
@@ -80,7 +80,7 @@
         <mxCell id="BllSFudeArZUFPEJDNgu-29" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="level" vertex="1">
           <mxGeometry height="30" width="80" x="465" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="BllSFudeArZUFPEJDNgu-30" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="service name" vertex="1">
+        <mxCell id="BllSFudeArZUFPEJDNgu-30" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;" value="&lt;u&gt;service name&lt;/u&gt;" vertex="1">
           <mxGeometry height="40" width="80" x="550" y="375" as="geometry" />
         </mxCell>
         <mxCell id="BllSFudeArZUFPEJDNgu-34" edge="1" parent="1" source="BllSFudeArZUFPEJDNgu-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.408;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;">
