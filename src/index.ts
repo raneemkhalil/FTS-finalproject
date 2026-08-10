@@ -2,7 +2,7 @@ import express from "express";
 import errorsHandling from "./middlewares/errors-handling";
 import {createUser, getUser} from "./db/queries/users";
 import errors from "./errors";
-import {makeJWT, makeRefreshToken} from "./utils";
+import {checkPasswordHash, hashPassword, makeJWT, makeRefreshToken} from "./utils";
 import {config} from "./config";
 import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens";
 
@@ -21,6 +21,8 @@ app.post(`/api/register`, async (req: express.Request, res: express.Response) =>
         password: string,
         tenantName: string
     } = req.body
+
+    body.password = await hashPassword(body.password)
 
     const newUser = await createUser(body, body.tenantName)
     if (!newUser) {
@@ -44,7 +46,7 @@ app.post(`/api/login`, async (req: express.Request, res: express.Response) => {
     if (!user) {
         throw "Something went wrong, please try again!"
     }
-    if (body.password !== user.password) {
+    if (!await checkPasswordHash(body.password, user.password)) {
         throw new errors.UnauthorizedError("Invalid username or password")
     }
     if (!config.secret) {
