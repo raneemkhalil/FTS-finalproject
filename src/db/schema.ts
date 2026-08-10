@@ -47,6 +47,6 @@ export function logsTable(tenant_name: string) {
 export const users = usersTable("template");
 export const logs = logsTable("template");
 
-export type tenantType = typeof tenants.$inferInsert
-export type userType = typeof users.$inferInsert
-export type logType = typeof logs.$inferInsert
+export type Tenant = typeof tenants.$inferInsert
+export type User = typeof users.$inferInsert
+export type Log = typeof logs.$inferInsert
