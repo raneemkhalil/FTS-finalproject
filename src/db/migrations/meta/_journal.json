@@ -5,15 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1786288275930,
-      "tag": "0000_chilly_wolf_cub",
+      "when": 1786382412250,
+      "tag": "0000_tiny_sentinels",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1786292476069,
-      "tag": "0001_ancient_sersi",
+      "when": 1786382578057,
+      "tag": "0001_free_mimic",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786382766081,
+      "tag": "0002_far_metal_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786383391689,
+      "tag": "0003_rare_beyonder",
       "breakpoints": true
     }
   ]

@@ -1,6 +1,6 @@
 {
-  "id": "1593122d-4455-4d2d-891f-a749e6435628",
-  "prevId": "981342c1-abfa-44cb-805a-2dc26754a18b",
+  "id": "8f7dfdd4-6a65-432f-a7d6-c70fd14bc7d8",
+  "prevId": "1593122d-4455-4d2d-891f-a749e6435628",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -35,7 +35,7 @@
         },
         "message": {
           "name": "message",
-          "type": "varchar(256)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

@@ -31,8 +31,8 @@ export function logsTable(tenant_name: string) {
         requestId: uuid("request_id").notNull(),
         level: text("level").notNull(),
         serviceName: text("service_name").notNull(),
-        time: timestamp("time").notNull().defaultNow().$onUpdate(() => new Date()),
-        message: varchar({length: 256}),
+        time: timestamp("time", { withTimezone: true }).notNull().defaultNow(),
+        message: text("message"),
         attributes: jsonb("attributes").notNull().default(sql`'{}'::jsonb`),
         userId: uuid("user_id").references(() => {
             const users = usersTable(tenant_name);
@@ -44,9 +44,22 @@ export function logsTable(tenant_name: string) {
     ]);
 }
 
+export function refreshTokensTable(tenant_name: string) {
+    return pgSchema(tenant_name).table("refresh_tokens", {
+        token: varchar("token", {length: 256}).primaryKey(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+        userId: uuid("user_id").references(() => users.id, {onDelete: "cascade"}),
+        expiresAt: timestamp("expires_at").notNull(),
+        revokedAt: timestamp("revoked_at"),
+    })
+}
+
 export const users = usersTable("template");
 export const logs = logsTable("template");
+export const refreshTokens = refreshTokensTable("template");
 
 export type Tenant = typeof tenants.$inferInsert
 export type User = typeof users.$inferInsert
 export type Log = typeof logs.$inferInsert
+export type RefreshToken = typeof refreshTokens.$inferInsert;

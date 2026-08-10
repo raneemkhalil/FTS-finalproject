@@ -1,6 +1,6 @@
 {
-  "id": "1593122d-4455-4d2d-891f-a749e6435628",
-  "prevId": "981342c1-abfa-44cb-805a-2dc26754a18b",
+  "id": "9574315f-ece7-4d56-8cb1-1efc0b927532",
+  "prevId": "8f7dfdd4-6a65-432f-a7d6-c70fd14bc7d8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -28,14 +28,14 @@
         },
         "time": {
           "name": "time",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "message": {
           "name": "message",
-          "type": "varchar(256)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

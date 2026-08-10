@@ -6,3 +6,4 @@ node_modules
 # files
 *.bkp
 .DT_STORE
+.env
