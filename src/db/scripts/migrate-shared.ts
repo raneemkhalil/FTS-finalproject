@@ -5,15 +5,13 @@ import {drizzle} from "drizzle-orm/postgres-js";
 import {getMigrations, migrate} from "./helper"
 
 
-async function migratePublic() {
-    const conn = postgres(config.dbCredential)
+export async function migratePublic() {
+    const conn = postgres({...config.dbCredential, max: 1})
     const db = drizzle(conn, { schema })
 
     const migrations = getMigrations("public");
     await migrate(db, "public", migrations)
-
     await conn.end()
-    process.exit(0)
 }
 
 migratePublic().catch(() => process.exit(1))

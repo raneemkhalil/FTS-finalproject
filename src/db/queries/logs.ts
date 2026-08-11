@@ -8,14 +8,24 @@ export enum Level {
     ERROR = "error"
 }
 
-export async function createLog(log: Log, tenant: string) {
+export async function createLog(userId: string, requestId: string, logsList: Log[], tenant: string) {
     const logs = logsTable(tenant);
-    let res;
-    try {
-        [res] = await db.insert(logs).values(log).onConflictDoNothing().returning()
-    } catch (e) {
-        console.log(e)
-        throw "Couldn't create the log."
-    }
+
+    logsList = logsList.map((value) => {
+        value.requestId = requestId
+        value.userId = userId
+        return value
+    })
+
+    const res = await Promise.all(logsList.map(async (log) => {
+        const [r] = await db.insert(logs).values(log).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
+        return r
+    }))
+    return res
+}
+
+export async function getLogs(tenant: string) {
+    const logs = logsTable(tenant)
+    const res: Log[] = await db.select().from(logs)
     return res
 }

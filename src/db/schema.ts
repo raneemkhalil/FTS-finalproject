@@ -28,7 +28,7 @@ export function usersTable(tenant_name: string) {
 
 export function logsTable(tenant_name: string) {
     return pgSchema(tenant_name).table("logs", {
-        requestId: uuid("request_id").notNull(),
+        requestId: uuid("request_id").notNull().defaultRandom(),
         level: text("level").notNull(),
         serviceName: text("service_name").notNull(),
         time: timestamp("time", { withTimezone: true }).notNull().defaultNow(),

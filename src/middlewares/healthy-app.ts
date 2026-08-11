@@ -1,0 +1,33 @@
+import {checkDbConnection, checkMigrations, Status} from "../healthness";
+import express from "express";
+
+export let healthy : {
+    ready: boolean,
+    details: Record<string, any>
+} = {
+    ready: true,
+    details: {}
+}
+
+export async function healthyCheck(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const names = ["db", "migration"]
+    const results = await Promise.allSettled([checkDbConnection(), checkMigrations()])
+
+    results.forEach((res, index) => {
+        if (res.status === "fulfilled") {
+            healthy.details[names[index]] = res.value as { status: Status, message?: string }
+            healthy.ready = res.value.status === Status.SUCCESS
+        } else {
+            healthy.details[names[index]] = {
+                status: Status.FAILED,
+                message: res.reason?.message
+            }
+            healthy.ready = false
+        }
+    })
+    // if(!healthy.ready) {
+        // res.status(500).json(healthy.details)
+        next()
+    // }
+    // res.status(200).json({...healthy.details, info: "Server is ready to listen"})
+}

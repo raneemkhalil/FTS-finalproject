@@ -30,12 +30,6 @@ export function getBearerToken(req: express.Request) {
     return bearerToken.split(" ")[1];
 }
 
-export function getAPIKey(req: express.Request) {
-    const APIKey = req.header("Authorization")
-    if (!APIKey) throw new errors.UnauthorizedError("No token provided");
-    return APIKey.split(" ")[1];
-}
-
 export function makeRefreshToken() {
     return crypto.randomBytes(32).toString("hex")
 }

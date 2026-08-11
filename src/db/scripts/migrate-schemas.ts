@@ -2,7 +2,7 @@ import postgres from "postgres";
 import {config} from "../../config";
 import {drizzle} from "drizzle-orm/postgres-js";
 import * as schema from "../schema";
-import {eq, not, sql} from "drizzle-orm";
+import {sql} from "drizzle-orm";
 import { tenants } from "../schema";
 import {getMigrations, migrate} from "./helper"
 import {dbType} from "../index";
@@ -32,15 +32,13 @@ export async function migrateEachTenant(db: dbType, tenant: string) {
     await addPartitionExtension(db, tenant)
 }
 
-async function migrateSchema() {
-    const conn = postgres(config.dbCredential)
+export async function migrateSchema() {
+    const conn = postgres({...config.dbCredential, max: 1})
     const db = drizzle(conn, { schema })
 
     const ts = await db.select({schemaName: tenants.schemaName}).from(tenants);
     await Promise.all(ts.map((t) => migrateEachTenant(db, t.schemaName))).catch((err) => console.error(err))
-
     await conn.end()
-    process.exit(0)
 }
 
 migrateSchema().catch(() => process.exit(1))
