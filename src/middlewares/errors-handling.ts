@@ -20,7 +20,7 @@ export default function errorsHandling (err: Error, req: express.Request, res: e
         })
     } else {
         res.status(500).json({
-            error: err.message
+            error: err.message || err
         })
     }
     next()

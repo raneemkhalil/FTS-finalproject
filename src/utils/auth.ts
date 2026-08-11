@@ -1,4 +1,4 @@
-import errors from "./errors";
+import errors from "../errors";
 import express from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import crypto from "node:crypto";

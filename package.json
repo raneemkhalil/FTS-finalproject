@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/luxon": "^3.7.4",
     "@types/node": "^26.2.0",
     "drizzle-kit": "^0.31.10",
     "express": "^5.2.1",
@@ -35,6 +36,7 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "jsonwebtoken": "^9.0.3",
+    "luxon": "^3.7.2",
     "postgres": "^3.4.9",
     "zod": "^4.4.3"
   }

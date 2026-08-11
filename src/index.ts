@@ -2,13 +2,13 @@ import express from "express";
 import errorsHandling from "./middlewares/errors-handling";
 import {createUser, getUser} from "./db/queries/users";
 import errors from "./errors";
-import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./auth";
+import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth";
 import {config} from "./config";
 import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens";
 import {createLog, getLogs} from "./db/queries/logs";
-import {Log} from "./db/schema";
-import {logValidations} from "./middlewares/log-validations";
+import {logValidations} from "./utils/log-validations";
 import {healthy, healthyCheck} from "./middlewares/healthy-app";
+import {LogReq} from "./z-types";
 
 
 const prefix = "/:tenant/api"
@@ -130,9 +130,19 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     res.status(200).json(logs)
 })
 
-app.post(`${prefix}/logs`, logValidations, async (req: express.Request, res: express.Response) => {
+app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) => {
     const tenantName = req.params.tenant as string
-    const body: Log[] = Array.isArray(req.body) ? req.body : [req.body]
+    const result = logValidations(req)
+
+    const body: {
+        logs: []
+    } = req.body
+    let logs: LogReq[] = body.logs;
+
+    if (result.rejected.length > 0) {
+        logs = logs.filter((log, index) => !(index in result.count))
+    }
+
     const requestId = crypto.randomUUID()
     const accessToken = getBearerToken(req)
 
@@ -147,8 +157,11 @@ app.post(`${prefix}/logs`, logValidations, async (req: express.Request, res: exp
         throw new errors.UnauthorizedError("Invalid or expired token!")
     }
 
-    const createdLog = await createLog(userId, requestId, body, tenantName)
-    res.status(201).json(createdLog)
+    await createLog(userId, requestId, logs, tenantName)
+    res.status(200).json({
+        accepted: result.accepted,
+        rejected: result.rejected
+    })
 })
 
 app.use(errorsHandling)

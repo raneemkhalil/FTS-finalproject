@@ -1,5 +1,6 @@
 import {Log, logsTable} from "../schema";
 import {db} from "../index";
+import {LogReq} from "../../z-types";
 
 export enum Level {
     DEBUG = "debug",
@@ -8,17 +9,21 @@ export enum Level {
     ERROR = "error"
 }
 
-export async function createLog(userId: string, requestId: string, logsList: Log[], tenant: string) {
+export async function createLog(userId: string, requestId: string, logsList: LogReq[], tenant: string) {
     const logs = logsTable(tenant);
 
-    logsList = logsList.map((value) => {
-        value.requestId = requestId
-        value.userId = userId
-        return value
-    })
+    let logsListTemp = logsList.map(value => ({
+        time: new Date(value.timestamp),
+        serviceName: value.service,
+        message: value.message,
+        level: value.level,
+        attributes: value.attributes,
+        userId: userId,
+        requestId: requestId
+    }))
 
     const res = await Promise.all(logsList.map(async (log) => {
-        const [r] = await db.insert(logs).values(log).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
+        const [r] = await db.insert(logs).values(logsListTemp).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
         return r
     }))
     return res

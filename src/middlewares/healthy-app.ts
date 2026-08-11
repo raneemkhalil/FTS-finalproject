@@ -25,9 +25,5 @@ export async function healthyCheck(req: express.Request, res: express.Response, 
             healthy.ready = false
         }
     })
-    // if(!healthy.ready) {
-        // res.status(500).json(healthy.details)
-        next()
-    // }
-    // res.status(200).json({...healthy.details, info: "Server is ready to listen"})
+    next()
 }
