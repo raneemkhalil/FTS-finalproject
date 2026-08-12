@@ -9,6 +9,7 @@ import {createLog, getLogs} from "./db/queries/logs";
 import {logValidations} from "./utils/log-validations";
 import {healthy, healthyCheck} from "./middlewares/healthy-app";
 import {LogReq} from "./z-types";
+import {pointers, setPointersUrls} from "./utils/set-pointers-urls";
 
 
 const prefix = "/:tenant/api"
@@ -113,6 +114,17 @@ app.post(`${prefix}/revoke`, async (req: express.Request, res: express.Response)
 app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) => {
     const accessToken = getBearerToken(req)
     const tenantName = req.params.tenant as string
+    const cursor = req.query.cursor as string
+    let limit = Number(req.query.limit as string)
+    let date: Date | null = null
+    let type: string = "next"
+
+    if(!limit) {
+        limit = 100
+    }
+    if (limit > 1000) {
+        throw new errors.BadRequestError("Maximum limit is 1000")
+    }
 
     if(!config.secret) {
         throw "Empty secret!"
@@ -122,12 +134,34 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     } catch (e) {
         throw new errors.UnauthorizedError("Invalid or expired token!")
     }
-    const logs = await getLogs(tenantName)
+
+    // getting data due to cursor => date and type
+    if (cursor) {
+        date = pointers.previous.cursor === cursor ? pointers.previous.date : pointers.next.date
+        type = pointers.previous.cursor === cursor ? pointers.previous.type : pointers.next.type
+    }
+
+    let logs = await getLogs(date, type, limit + 1, tenantName)
+
     if (!logs[0]) {
-        res.status(200).json([])
+        res.status(200).json({
+            next: null,
+            previous: null,
+            count: 0,
+            results: []
+        })
         return
     }
-    res.status(200).json(logs)
+
+    // setting prev and next urls in the response data
+    setPointersUrls(logs, tenantName, limit, type)
+
+    res.status(200).json({
+        next: pointers.next.nextUrl,
+        previous: pointers.previous.prevUrl,
+        count: logs.length,
+        results: logs
+    })
 })
 
 app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) => {
@@ -137,7 +171,7 @@ app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) =
     const body: {
         logs: []
     } = req.body
-    let logs: LogReq[] = body.logs;
+    let logs: LogReq = body.logs;
 
     if (result.rejected.length > 0) {
         logs = logs.filter((log, index) => !(index in result.count))

@@ -9,7 +9,7 @@ import {
     primaryKey,
     pgTable,
 } from "drizzle-orm/pg-core";
-import {sql} from "drizzle-orm";
+import {desc, sql} from "drizzle-orm";
 
 export const tenants = pgTable("tenants", {
     tenantId: uuid("tenant_id").primaryKey().notNull().defaultRandom(),

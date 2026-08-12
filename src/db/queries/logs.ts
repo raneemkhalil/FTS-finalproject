@@ -1,6 +1,7 @@
 import {Log, logsTable} from "../schema";
 import {db} from "../index";
 import {LogReq} from "../../z-types";
+import {desc, gt, lt} from "drizzle-orm";
 
 export enum Level {
     DEBUG = "debug",
@@ -9,7 +10,7 @@ export enum Level {
     ERROR = "error"
 }
 
-export async function createLog(userId: string, requestId: string, logsList: LogReq[], tenant: string) {
+export async function createLog(userId: string, requestId: string, logsList: LogReq, tenant: string) {
     const logs = logsTable(tenant);
 
     let logsListTemp = logsList.map(value => ({
@@ -29,8 +30,16 @@ export async function createLog(userId: string, requestId: string, logsList: Log
     return res
 }
 
-export async function getLogs(tenant: string) {
+export async function getLogs(date: Date | null, type: string, limit: number, tenant: string) {
     const logs = logsTable(tenant)
-    const res: Log[] = await db.select().from(logs)
+    let res: Log[];
+
+    if (!date) {
+        res = await db.select().from(logs).limit(limit).orderBy(desc(logs.time))
+    } else if (type === "next") {
+        res = await db.select().from(logs).where(lt(logs.time, date)).orderBy(desc(logs.time)).limit(limit)
+    } else {
+        res = await db.select().from(logs).where(gt(logs.time, date)).orderBy(desc(logs.time)).limit(limit)
+    }
     return res
 }
