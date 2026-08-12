@@ -1,11 +1,28 @@
 import express from "express";
+import errors from "../errors";
 
 export function setConditions(req: express.Request, date: Date | null, type: string) {
     const level = req.query.level as string
     const service = req.query.service as string
     const q = req.query.q as string
+
     const since = req.query.since ? new Date(req.query.since as string) : undefined;
     const until = req.query.until ? new Date(req.query.until as string) : undefined;
+
+    let dateIsoStr = date?.toISOString()
+    let sinceIsoStr
+    let untilIsoStr
+
+    try {
+        sinceIsoStr = since?.toISOString()
+        untilIsoStr = until?.toISOString()
+    } catch (e) {
+        throw new errors.BadRequestError(`${e}`)
+    }
+
+    if (since && until && (since > until)) {
+        throw new errors.BadRequestError("Since shouldn't be greater than until!")
+    }
 
     const queries = Object.keys(req.query)
     let attrKey = queries.find((value) => value.includes("attr")) || ""
@@ -13,38 +30,38 @@ export function setConditions(req: express.Request, date: Date | null, type: str
     attrKey = attrKey.split(".")[1]
 
     let conditions: string[] = []
-    if (!date && since && until) {
-        conditions.push(`time >= '${since.toISOString()}' AND time < '${until.toISOString()}'`)
+    if (!dateIsoStr && sinceIsoStr && untilIsoStr) {
+        conditions.push(`time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
-    if (!date && since && !until) {
-        conditions.push(`time >= '${since.toISOString()}'`)
+    if (!dateIsoStr && sinceIsoStr && !untilIsoStr) {
+        conditions.push(`time >= '${sinceIsoStr}'`)
     }
-    if (!date && !since && until) {
-        conditions.push(`time < '${until.toISOString()}'`)
+    if (!dateIsoStr && !sinceIsoStr && untilIsoStr) {
+        conditions.push(`time < '${untilIsoStr}'`)
     }
-    if (date && type === "next" && since && until) {
-        conditions.push(`time < '${date.toString()}' AND time >= '${since.toISOString()}' AND time < '${until.toISOString()}'`)
+    if (dateIsoStr && type === "next" && sinceIsoStr && untilIsoStr) {
+        conditions.push(`time < '${dateIsoStr}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
-    if (date && type === "next" && since && !until) {
-        conditions.push(`time < '${date.toString()}' AND time >= '${since.toISOString()}'`)
+    if (dateIsoStr && type === "next" && sinceIsoStr && !untilIsoStr) {
+        conditions.push(`time < '${dateIsoStr}' AND time >= '${sinceIsoStr}'`)
     }
-    if (date && type === "next" && !since && until) {
-        conditions.push(`time < '${date.toString()}' AND time < '${until.toISOString()}'`)
+    if (dateIsoStr && type === "next" && !sinceIsoStr && untilIsoStr) {
+        conditions.push(`time < '${dateIsoStr}' AND time < '${untilIsoStr}'`)
     }
-    if (date && type === "previous" && since && until) {
-        conditions.push(`time > '${date.toString()}' AND time >= '${since.toISOString()}' AND time < '${until.toISOString()}'`)
+    if (dateIsoStr && type === "previous" && sinceIsoStr && untilIsoStr) {
+        conditions.push(`time > '${dateIsoStr}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
-    if (date && type === "previous" && since && !until) {
-        conditions.push(`time > '${date.toString()}' AND time >= '${since.toISOString()}'`)
+    if (dateIsoStr && type === "previous" && sinceIsoStr && !untilIsoStr) {
+        conditions.push(`time > '${dateIsoStr}' AND time >= '${sinceIsoStr}'`)
     }
-    if (date && type === "previous" && !since && until) {
-        conditions.push(`time > '${date.toString()}' AND time < '${until.toISOString()}'`)
+    if (dateIsoStr && type === "previous" && !sinceIsoStr && untilIsoStr) {
+        conditions.push(`time > '${dateIsoStr}' AND time < '${untilIsoStr}'`)
     }
-    if (date && type === "next") {
-        conditions.push(`time < '${date.toString()}'`)
+    if (dateIsoStr && type === "next") {
+        conditions.push(`time < '${dateIsoStr}'`)
     }
-    if (date && type === "previous") {
-        conditions.push(`time > '${date.toString()}'`)
+    if (dateIsoStr && type === "previous") {
+        conditions.push(`time > '${dateIsoStr}'`)
     }
     if (level) {
         conditions.push(`level = '${level}'`)

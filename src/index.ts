@@ -117,7 +117,11 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     const cursor = req.query.cursor as string
     const limit = req.query.limit as string
 
-    let limitNum = Number(limit)
+    let limitNum = Number(limit);
+    if (isNaN(limitNum)){
+        throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
+    }
+
     let date: Date | null = null
     let type: string = "next"
 
@@ -137,6 +141,10 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
         throw new errors.UnauthorizedError("Invalid or expired token!")
     }
 
+    // check the validation of the cursor if exist
+    if (cursor && pointers.previous.cursor !== cursor && pointers.next.cursor !== cursor) {
+        throw new errors.BadRequestError("Invalid or malformed cursor!")
+    }
     // getting data due to cursor => date and type
     if (cursor) {
         date = pointers.previous.cursor === cursor ? pointers.previous.date : pointers.next.date
