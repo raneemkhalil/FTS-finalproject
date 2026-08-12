@@ -1,13 +1,22 @@
-import {Log, logsTable} from "../schema";
+import { logsTable} from "../schema";
 import {db} from "../index";
 import {LogReq} from "../../z-types";
-import {desc, gt, lt} from "drizzle-orm";
+import express from "express";
+import {setConditions} from "../../utils/set-conditions";
 
 export enum Level {
     DEBUG = "debug",
     INFO = "info",
     WARN = "warn",
     ERROR = "error"
+}
+
+export type LogResponse = {
+    timestamp: Date,
+    level: string,
+    service: string,
+    message: string,
+    attributes: unknown
 }
 
 export async function createLog(userId: string, requestId: string, logsList: LogReq, tenant: string) {
@@ -30,16 +39,9 @@ export async function createLog(userId: string, requestId: string, logsList: Log
     return res
 }
 
-export async function getLogs(date: Date | null, type: string, limit: number, tenant: string) {
-    const logs = logsTable(tenant)
-    let res: Log[];
-
-    if (!date) {
-        res = await db.select().from(logs).limit(limit).orderBy(desc(logs.time))
-    } else if (type === "next") {
-        res = await db.select().from(logs).where(lt(logs.time, date)).orderBy(desc(logs.time)).limit(limit)
-    } else {
-        res = await db.select().from(logs).where(gt(logs.time, date)).orderBy(desc(logs.time)).limit(limit)
-    }
+export async function getLogs(date: Date | null, type: string, limit: number, tenant: string, req: express.Request) {
+    let res: LogResponse[];
+    let conditions = setConditions(req, date, type)
+    res = await db.execute(`SELECT time as timestamp, level, service_name as service, message, attributes FROM ${tenant}.logs WHERE ${conditions} ORDER BY time DESC LIMIT ${limit}`)
     return res
 }

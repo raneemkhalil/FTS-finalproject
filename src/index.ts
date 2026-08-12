@@ -115,14 +115,16 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     const accessToken = getBearerToken(req)
     const tenantName = req.params.tenant as string
     const cursor = req.query.cursor as string
-    let limit = Number(req.query.limit as string)
+    const limit = req.query.limit as string
+
+    let limitNum = Number(limit)
     let date: Date | null = null
     let type: string = "next"
 
-    if(!limit) {
-        limit = 100
+    if(!limitNum) {
+        limitNum = 100
     }
-    if (limit > 1000) {
+    if (limitNum > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
     }
 
@@ -141,7 +143,7 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
         type = pointers.previous.cursor === cursor ? pointers.previous.type : pointers.next.type
     }
 
-    let logs = await getLogs(date, type, limit + 1, tenantName)
+    let logs = await getLogs(date, type, limitNum + 1, tenantName, req)
 
     if (!logs[0]) {
         res.status(200).json({
@@ -154,13 +156,14 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     }
 
     // setting prev and next urls in the response data
-    setPointersUrls(logs, tenantName, limit, type)
+    setPointersUrls(logs, tenantName, limitNum, type, req.url)
 
     res.status(200).json({
         next: pointers.next.nextUrl,
         previous: pointers.previous.prevUrl,
         count: logs.length,
-        results: logs
+        logs: logs,
+        next_cursor: pointers.next.cursor
     })
 })
 

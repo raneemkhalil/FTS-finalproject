@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import {Log} from "../db/schema";
+import {LogResponse} from "../db/queries/logs";
 
 
 export let pointers: {
@@ -30,7 +30,7 @@ export let pointers: {
     }
 }
 
-export function setPointersUrls(logs: Log[], tenantName: string, limit: number, type: string) {
+export function setPointersUrls(logs: LogResponse[], tenantName: string, limit: number, type: string, subUrl: string) {
     // to know if i have next or previous logs
     const logsLength = logs.length
 
@@ -44,18 +44,19 @@ export function setPointersUrls(logs: Log[], tenantName: string, limit: number, 
         logs = revLogs.reverse()
     }
 
-    const prevTime= logs[0].time
-    const nextTime = logs[logs.length - 1].time
+    const prevTime= logs[0].timestamp
+    const nextTime = logs[logs.length - 1].timestamp
+    subUrl = subUrl.split('&cursor')[0]
 
     if (prevTime && pointers.next.cursor !== null) {
         pointers.previous.cursor = crypto.randomBytes(32).toString("base64").replaceAll('+', '-')
         pointers.previous.date = prevTime
-        pointers.previous.prevUrl = type === "previous" && logsLength !== limit + 1 ? null : `http://localhost:8080/${tenantName}/api/logs?limit=${limit}&cursor=${pointers.previous.cursor}`
+        pointers.previous.prevUrl = type === "previous" && logsLength !== limit + 1 ? null : `http://localhost:8080${subUrl}&cursor=${pointers.previous.cursor}`
     }
 
     if (nextTime) {
-        pointers.next.cursor = crypto.randomBytes(32).toString("base64").replaceAll('+', '-')
+        pointers.next.cursor = type === "next" && logsLength !== limit + 1 ? null : crypto.randomBytes(32).toString("base64").replaceAll('+', '-')
         pointers.next.date = nextTime
-        pointers.next.nextUrl = type === "next" && logsLength !== limit + 1 ? null : `http://localhost:8080/${tenantName}/api/logs?limit=${limit}&cursor=${pointers.next.cursor}`
+        pointers.next.nextUrl = type === "next" && logsLength !== limit + 1 ? null : `http://localhost:8080${subUrl}&cursor=${pointers.next.cursor}`
     }
 }
