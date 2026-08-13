@@ -1,9 +1,9 @@
 import * as process from "node:process";
-import { migrateEachTenant } from "../../scripts/migrate-schemas";
+import { migrateEachTenant } from "./migrate-schemas";
 import postgres from "postgres";
-import {config} from "../../../config";
+import {config} from "../../config";
 import {drizzle} from "drizzle-orm/postgres-js";
-import * as schema from "../../schema";
+import * as schema from "../schema";
 
 export async function createTenant(schemaName: string) {
     const conn = postgres(config.dbCredential)

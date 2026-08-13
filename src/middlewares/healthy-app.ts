@@ -1,4 +1,4 @@
-import {checkDbConnection, checkMigrations, Status} from "../healthness";
+import {checkDbConnection, checkMigrations, Status} from "../utils/healthness";
 import express from "express";
 
 export let healthy : Healthy = {
