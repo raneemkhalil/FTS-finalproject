@@ -1,1 +1,0 @@
-ALTER TABLE "template"."logs" ALTER COLUMN "message" SET DATA TYPE text;

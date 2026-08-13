@@ -8,6 +8,7 @@
     "migrate-shared": "tsx src/db/scripts/migrate-shared.ts",
     "migrate-schemas": "tsx src/db/scripts/migrate-schemas.ts",
     "create-tenant": "tsx src/db/queries/tenants/create-tenant.ts",
+    "generate-logs": "tsx src/generate-logs.ts",
     "server": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

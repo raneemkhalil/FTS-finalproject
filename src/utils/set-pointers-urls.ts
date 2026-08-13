@@ -15,7 +15,7 @@ export let pointers: Pointers = {
     }
 }
 
-export function setPointersUrls(logs: LogResponse[], tenantName: string, limit: number, type: string, subUrl: string) {
+export function setPointersUrls(logs: LogResponse[], limit: number, type: string, subUrl: string) {
     // to know if i have next or previous logs
     const logsLength = logs.length
 

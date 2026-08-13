@@ -5,11 +5,13 @@ import errors from "./errors";
 import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth";
 import {config} from "./config";
 import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens";
-import {createLog, getLogs, getLogsAggregation} from "./db/queries/logs";
+import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs";
 import {logValidations} from "./utils/log-validations";
 import {healthy, healthyCheck} from "./middlewares/healthy-app";
 import {LogReq} from "./z-types";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls";
+import crypto from "node:crypto";
+import {decodeLookupId} from "./db/utils/log-lookup";
 
 export const app = express();
 app.use(express.json())
@@ -47,7 +49,7 @@ app.post("/register", async (req: express.Request, res: express.Response) => {
 
     res.status(201).json({
         message: "Successfully registered, please login again.",
-        user: newUser
+        username: newUser.username
     })
 })
 
@@ -149,13 +151,14 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
             next: null,
             previous: null,
             count: 0,
-            results: []
+            logs: [],
+            next_cursor: null
         })
         return
     }
 
     // setting prev and next urls in the response data
-    setPointersUrls(logs, tenantName, limitNum, type, req.url)
+    setPointersUrls(logs, limitNum, type, req.url)
 
     res.status(200).json({
         next: pointers.next.nextUrl,
@@ -164,6 +167,23 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
         logs: logs,
         next_cursor: pointers.next.cursor
     })
+})
+
+app.get("/logs/:id", async (req: express.Request, res: express.Response) => {
+    const [tenantName, accessToken] = getBearerToken(req)
+    const id = req.params.id as string
+
+    if (!config.secret) {
+        throw "Empty secret!"
+    }
+    try {
+        validateJWT(accessToken, config.secret)
+    } catch (e) {
+        throw new errors.UnauthorizedError("Invalid or expired token!")
+    }
+    const log: LogResponse = await getLogByLookup(id, tenantName)
+
+    res.status(200).json(log)
 })
 
 app.post("/logs", async (req: express.Request, res: express.Response) => {

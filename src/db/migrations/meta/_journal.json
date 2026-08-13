@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1786382412250,
-      "tag": "0000_tiny_sentinels",
+      "when": 1786607138468,
+      "tag": "0000_milky_firestar",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1786382578057,
-      "tag": "0001_free_mimic",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1786382766081,
-      "tag": "0002_far_metal_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1786383391689,
-      "tag": "0003_rare_beyonder",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1786390383650,
-      "tag": "0004_overconfident_natasha_romanoff",
+      "when": 1786609773518,
+      "tag": "0001_hot_marvel_boy",
       "breakpoints": true
     }
   ]

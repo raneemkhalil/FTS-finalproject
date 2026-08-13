@@ -1,6 +1,6 @@
 {
-  "id": "1593122d-4455-4d2d-891f-a749e6435628",
-  "prevId": "981342c1-abfa-44cb-805a-2dc26754a18b",
+  "id": "b2c2b86c-c1d6-4aa6-91b2-e2c3a76d9a58",
+  "prevId": "c895f70c-a2fb-4d3e-a183-47b83524bbb6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8,11 +8,19 @@
       "name": "logs",
       "schema": "template",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "request_id": {
           "name": "request_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "level": {
           "name": "level",
@@ -28,14 +36,14 @@
         },
         "time": {
           "name": "time",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "message": {
           "name": "message",
-          "type": "varchar(256)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -54,6 +62,21 @@
         }
       },
       "indexes": {
+        "id_idx": {
+          "name": "id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "logs_attribute_idx": {
           "name": "logs_attribute_idx",
           "columns": [
@@ -97,7 +120,15 @@
           ]
         }
       },
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "logs_id_unique": {
+          "name": "logs_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

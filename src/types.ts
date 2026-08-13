@@ -7,7 +7,8 @@ type Journal = {
     }[]
 }
 type LogResponse = {
-    timestamp: Date,
+    id: string,
+    timestamp: Date | null,
     level: string,
     service: string,
     message: string,
@@ -53,3 +54,11 @@ type Aggregate = {
     group: string | null
     count: number,
 }
+
+type LogLookup =  {
+    time: string;
+    serviceName: string;
+    userId: string | number;
+    requestId: string;
+}
+

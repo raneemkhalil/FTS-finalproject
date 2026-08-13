@@ -1,9 +1,9 @@
 CREATE TABLE "template"."logs" (
-	"request_id" uuid NOT NULL,
+	"request_id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"level" text NOT NULL,
 	"service_name" text NOT NULL,
-	"time" timestamp DEFAULT now() NOT NULL,
-	"message" varchar(256),
+	"time" timestamp with time zone DEFAULT now() NOT NULL,
+	"message" text,
 	"attributes" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"user_id" uuid,
 	CONSTRAINT "logs_pk" PRIMARY KEY("user_id","request_id","time","service_name")

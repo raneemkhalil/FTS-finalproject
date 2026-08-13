@@ -1,10 +1,12 @@
-import { logsTable} from "../schema";
+import {Log, logsTable} from "../schema";
 import {db} from "../index";
 import {LogReq} from "../../z-types";
 import express from "express";
 import {setConditions} from "../../utils/set-conditions";
 import errors from "../../errors";
 import {parseEpoch} from "../utils/parse-epoch";
+import {decodeLookupId} from "../utils/log-lookup";
+import {and, eq} from "drizzle-orm";
 
 export enum Level {
     DEBUG = "debug",
@@ -35,9 +37,30 @@ export async function createLog(userId: string, requestId: string, logsList: Log
 
 export async function getLogs(date: Date | null, type: string, limit: number, tenant: string, req: express.Request) {
     let res: LogResponse[];
-    let conditions = setConditions(req, date, type)
-    res = await db.execute(`SELECT time as timestamp, level, service_name as service, message, attributes FROM ${tenant}.logs WHERE ${conditions} ORDER BY time DESC LIMIT ${limit}`)
-    return res
+    let conditions = setConditions(req, date, type);
+
+    let sql = `
+        SELECT 
+            encode(
+                convert_to(CONCAT(time, '|', service_name, '|', user_id, '|', request_id), 'UTF8'), 
+                'hex'
+            ) AS id, 
+            time as timestamp, 
+            level, 
+            service_name as service, 
+            message, 
+            attributes 
+        FROM ${tenant}.logs 
+    `;
+
+    if (conditions) {
+        sql += `WHERE ${conditions} `;
+    }
+
+    sql += `ORDER BY time DESC LIMIT ${limit};`;
+
+    res = await db.execute(sql);
+    return res;
 }
 
 export async function getLogsAggregation(req: express.Request, tenant: string) {
@@ -60,4 +83,25 @@ export async function getLogsAggregation(req: express.Request, tenant: string) {
     }
     groupBy = groupBy.replace("service", "service_name")
     return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, ${groupBy} as group, COUNT(*) from ${tenant}.logs WHERE ${conditions} GROUP BY ${groupBy}, start_date ORDER BY start_date ASC`)
+}
+
+export async function getLogByLookup(lookup: string, tenant: string) {
+    const logs = logsTable(tenant)
+    const { time, serviceName, userId, requestId } = decodeLookupId(lookup)
+    const datetime = new Date(time)
+
+    const [log]: Log[] = await db.select().from(logs).where(and(
+        eq(logs.time, datetime),
+        eq(logs.serviceName, serviceName),
+        eq(logs.userId, userId as string),
+        eq(logs.requestId, requestId)
+    ))
+    return {
+        id: lookup,
+        timestamp: log.time || null,
+        level: log.level,
+        service: log.serviceName,
+        message: log.message || "",
+        attributes: log.attributes
+    }
 }
