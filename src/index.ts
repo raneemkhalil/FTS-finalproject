@@ -11,14 +11,11 @@ import {healthy, healthyCheck} from "./middlewares/healthy-app";
 import {LogReq} from "./z-types";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls";
 
-
-const prefix = "/:tenant/api"
-
 export const app = express();
 app.use(express.json())
 app.use(healthyCheck)
 
-app.use(`/`, (req: express.Request, res: express.Response) => {
+app.get(`/`, (req: express.Request, res: express.Response) => {
     if(!healthy.ready) {
         res.status(500).send("<h1 style='text-align: center>Could not lesson to server</h1>")
         return
@@ -34,7 +31,7 @@ app.get("/health", (req: express.Request, res: express.Response) => {
     res.status(200).json({...healthy.details, info: "Server is ready to listen"})
 })
 
-app.post(`/api/register`, async (req: express.Request, res: express.Response) => {
+app.post("/register", async (req: express.Request, res: express.Response) => {
     const body: {
         username: string,
         password: string,
@@ -54,7 +51,7 @@ app.post(`/api/register`, async (req: express.Request, res: express.Response) =>
     })
 })
 
-app.post(`/api/login`, async (req: express.Request, res: express.Response) => {
+app.post("/login", async (req: express.Request, res: express.Response) => {
     const body: {
         username: string,
         password: string,
@@ -77,14 +74,13 @@ app.post(`/api/login`, async (req: express.Request, res: express.Response) => {
 
     res.status(200).json({
         username: user.username,
-        token: accessToken,
-        refresh_token: refreshTokenIns.token
+        token: tenantName + " " + accessToken,
+        refresh_token: tenantName + " " + refreshTokenIns.token
     })
 })
 
-app.post(`${prefix}/refresh`, async (req: express.Request, res: express.Response) => {
-    const requiredRefreshToken = getBearerToken(req)
-    const tenantName = req.params.tenant as string
+app.post("/refresh", async (req: express.Request, res: express.Response) => {
+    const [tenantName, requiredRefreshToken] = getBearerToken(req)
     const refreshToken = await getRefreshToken(requiredRefreshToken, tenantName)
     const date = new Date();
     if (!refreshToken || refreshToken.expiresAt < date || refreshToken.revokedAt !== null) {
@@ -96,24 +92,22 @@ app.post(`${prefix}/refresh`, async (req: express.Request, res: express.Response
     }
     const token = makeJWT(refreshToken.userId || "", 3600, config.secret)
     res.status(200).json({
-        token: token,
+        token: tenantName + " " + token,
     })
 })
 
-app.post(`${prefix}/revoke`, async (req: express.Request, res: express.Response) => {
-    const requiredRefreshToken = getBearerToken(req)
-    const tenantName = req.params.tenant as string
+app.post("/revoke", async (req: express.Request, res: express.Response) => {
+    const [tenantName, requiredRefreshToken] = getBearerToken(req)
     try {
-        await revokeRefreshToken(requiredRefreshToken?.split(" ")[1] || " ", tenantName)
+        await revokeRefreshToken(requiredRefreshToken, tenantName)
     } catch (e) {
         throw e;
     }
     res.status(204).send()
 })
 
-app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) => {
-    const accessToken = getBearerToken(req)
-    const tenantName = req.params.tenant as string
+app.get("/logs", async (req: express.Request, res: express.Response) => {
+    const [tenantName, accessToken] = getBearerToken(req)
     const cursor = req.query.cursor as string
     const limit = req.query.limit as string
 
@@ -172,8 +166,8 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     })
 })
 
-app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) => {
-    const tenantName = req.params.tenant as string
+app.post("/logs", async (req: express.Request, res: express.Response) => {
+    const [tenantName, accessToken] = getBearerToken(req)
     const result = logValidations(req)
 
     const body: {
@@ -186,7 +180,6 @@ app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) =
     }
 
     const requestId = crypto.randomUUID()
-    const accessToken = getBearerToken(req)
 
     let userId: string
 
@@ -206,10 +199,8 @@ app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) =
     })
 })
 
-app.get(`${prefix}/logs/aggregate`, async (req: express.Request, res: express.Response) => {
-    const accessToken = getBearerToken(req)
-    const tenant = req.params.tenant as string
-    // let result: Aggregate[];
+app.get("/logs/aggregate", async (req: express.Request, res: express.Response) => {
+    const [tenant, accessToken] = getBearerToken(req)
     if(!config.secret) {
         throw "Empty secret!"
     }

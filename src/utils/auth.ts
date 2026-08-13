@@ -27,7 +27,8 @@ export function validateJWT(tokenString: string, secret: string): string {
 export function getBearerToken(req: express.Request) {
     const bearerToken = req.header("Authorization")
     if (!bearerToken) throw new errors.UnauthorizedError("No token provided");
-    return bearerToken.split(" ")[1];
+    let bearerTokenArr = bearerToken.split(" ")
+    return [bearerTokenArr[1], bearerTokenArr[2]]
 }
 
 export function makeRefreshToken() {
