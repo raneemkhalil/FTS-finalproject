@@ -1,5 +1,6 @@
 import {LogReq, logSchema} from "../z-types";
 import express from "express";
+import errors from "../errors";
 
 // check the validation of the response
 export function logValidations(req: express.Request): result {
@@ -9,7 +10,7 @@ export function logValidations(req: express.Request): result {
 
     const contentType = req.header("Content-Type")
     if (!contentType || contentType === "text/plain") {
-        throw "Invalid data!"
+        throw new errors.BadRequestError("Invalid data!")
     }
 
     const logs: LogReq[] = req.body.logs
@@ -36,7 +37,7 @@ export function logValidations(req: express.Request): result {
     for (let err of jsonE) {
         // no path when the structure is wrong
         if (err.path.length < 1) {
-            throw "Invalid Data!"
+            throw new errors.BadRequestError("Invalid Data!")
         }
         const index = err.path[0]
         if (!(index in count)) {
@@ -53,7 +54,7 @@ export function logValidations(req: express.Request): result {
 
     const countOfRejected = logs.length - Object.keys(count).length
     if (countOfRejected === 0) {
-        throw "Invalid logs!"
+        throw new errors.BadRequestError("Invalid logs!")
     }
 
     return {
