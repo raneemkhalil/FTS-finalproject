@@ -14,6 +14,8 @@ export async function createTenant(schemaName: string) {
     } catch (err) {
         console.error("Failed to create tenant:", err);
         throw err;
+    } finally {
+        await conn.end()
     }
 }
 

@@ -19,8 +19,8 @@ function addMigrationQuery(migrationQueries: MigrationMeta[], migrationFolderTo:
 
         try {
             const query = fs.readFileSync(migrationPath).toString();
-            let res = query.split(DRIZZLE_STATEMENT_BREAKPOINT).filter((it: string) => (tenant === "public" && it.includes("tenantsQueries")) ||
-                (tenant !== "public" && !it.includes("tenantsQueries")));
+            let res = query.split(DRIZZLE_STATEMENT_BREAKPOINT).filter((it: string) => (tenant === "public" && it.includes("tenants")) ||
+                (tenant !== "public" && !it.includes("tenants")));
             if (tenant !== "public") {
                 res = res.map((it) => {
                     const i = it.replaceAll(TENANT_MIGRATIONS_SCHEMA, tenant);

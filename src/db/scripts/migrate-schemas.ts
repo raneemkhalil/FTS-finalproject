@@ -37,8 +37,7 @@ export async function migrateSchema() {
     const db = drizzle(conn, { schema })
 
     const ts = await db.select({schemaName: tenants.schemaName}).from(tenants);
-    await Promise.all(ts.map((t) => migrateEachTenant(db, t.schemaName))).catch((err) => console.error(err))
-    await conn.end()
+    await Promise.all(ts.map((t) => migrateEachTenant(db, t.schemaName))).catch((err) => console.error(err)).finally(() => conn.end())
 }
 
 migrateSchema().catch(() => process.exit(1))
