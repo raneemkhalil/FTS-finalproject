@@ -11,10 +11,16 @@ import {healthy, healthyCheck} from "./middlewares/healthy-app";
 import {LogReq} from "./z-types";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls";
 import crypto from "node:crypto";
-import {decodeLookupId} from "./db/utils/log-lookup";
+import {migrateEachTenant} from "./db/scripts/migrate-schemas";
+import {db} from "./db";
 
 export const app = express();
-app.use(express.json())
+// Increase JSON body parser limit (default is '100kb')
+app.use(express.json({ limit: '50mb' }));
+
+// Increase URL-encoded payload limit if accepting form submissions
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 app.use(healthyCheck)
 
 app.get(`/`, (req: express.Request, res: express.Response) => {
@@ -40,9 +46,19 @@ app.post("/register", async (req: express.Request, res: express.Response) => {
         tenantName?: string
     } = req.body
 
+    const tenantName = body.tenantName || body.username
+
+    try {
+        await migrateEachTenant(db, tenantName)
+        console.log(`Tenant created: name="${tenantName}", schema="${tenantName}"`);
+    } catch (err) {
+        console.error("Failed to create tenant:", err);
+        throw err;
+    }
+
     body.password = await hashPassword(body.password)
 
-    const newUser = await createUser(body, body.tenantName || body.username)
+    const newUser = await createUser(body, tenantName)
     if (!newUser) {
         throw "Something went wrong, please try again!"
     }
@@ -118,7 +134,7 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
         throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
     }
 
-    let date: Date | null = null
+    let date: string | null = null
     let type: "next" | "previous" | undefined = "next"
 
     if (limitNum > 1000) {
@@ -169,6 +185,22 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
     })
 })
 
+app.get("/logs/aggregate", async (req: express.Request, res: express.Response) => {
+    const [tenant, accessToken] = getBearerToken(req)
+    if(!config.secret) {
+        throw "Empty secret!"
+    }
+    try {
+       validateJWT(accessToken, config.secret)
+    } catch (e) {
+        throw new errors.UnauthorizedError("Invalid or expired token!")
+    }
+    let results = await getLogsAggregation(req, tenant)
+    res.status(200).json({
+        buckets: results
+    })
+})
+
 app.get("/logs/:id", async (req: express.Request, res: express.Response) => {
     const [tenantName, accessToken] = getBearerToken(req)
     const id = req.params.id as string
@@ -181,7 +213,7 @@ app.get("/logs/:id", async (req: express.Request, res: express.Response) => {
     } catch (e) {
         throw new errors.UnauthorizedError("Invalid or expired token!")
     }
-    const log: LogResponse = await getLogByLookup(id, tenantName)
+    const log = await getLogByLookup(id, tenantName)
 
     res.status(200).json(log)
 })
@@ -216,22 +248,6 @@ app.post("/logs", async (req: express.Request, res: express.Response) => {
     res.status(200).json({
         accepted: result.accepted,
         rejected: result.rejected
-    })
-})
-
-app.get("/logs/aggregate", async (req: express.Request, res: express.Response) => {
-    const [tenant, accessToken] = getBearerToken(req)
-    if(!config.secret) {
-        throw "Empty secret!"
-    }
-    try {
-       validateJWT(accessToken, config.secret)
-    } catch (e) {
-        throw new errors.UnauthorizedError("Invalid or expired token!")
-    }
-    let results = await getLogsAggregation(req, tenant)
-    res.status(200).json({
-        buckets: results
     })
 })
 

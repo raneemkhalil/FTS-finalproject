@@ -32,6 +32,9 @@ export function setPointersUrls(logs: LogResponse[], limit: number, type: string
     const prevTime= logs[0].timestamp
     const nextTime = logs[logs.length - 1].timestamp
     subUrl = subUrl.split('&cursor')[0]
+    if (!(subUrl.includes("?limit"))) {
+        subUrl += `?limit=${limit}`
+    }
 
     if (prevTime && pointers.next.cursor !== null) {
         pointers.previous.cursor = crypto.randomBytes(32).toString("base64").replaceAll('+', '-')

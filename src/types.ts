@@ -8,7 +8,7 @@ type Journal = {
 }
 type LogResponse = {
     id: string,
-    timestamp: Date | null,
+    timestamp: string | null,
     level: string,
     service: string,
     message: string,
@@ -38,13 +38,13 @@ type result = {
 type Pointers = {
     next: {
         cursor: string | null,
-        date: Date | null,
+        date: string | null,
         nextUrl: string | null,
         type: "next"
     },
     previous: {
         cursor: string | null,
-        date: Date | null,
+        date: string | null,
         prevUrl: string | null,
         type: "previous"
     }

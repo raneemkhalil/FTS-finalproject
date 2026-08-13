@@ -28,14 +28,14 @@ export async function createLog(userId: string, requestId: string, logsList: Log
         requestId: requestId
     }))
 
-    const res = await Promise.all(logsList.map(async (log) => {
-        const [r] = await db.insert(logs).values(logsListTemp).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
+    const res = await Promise.all(logsListTemp.map(async (log) => {
+        const [r] = await db.insert(logs).values(log).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
         return r
     }))
     return res
 }
 
-export async function getLogs(date: Date | null, type: string, limit: number, tenant: string, req: express.Request) {
+export async function getLogs(date: string | null, type: string, limit: number, tenant: string, req: express.Request) {
     let res: LogResponse[];
     let conditions = setConditions(req, date, type);
 
