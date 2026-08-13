@@ -5,7 +5,7 @@ import errors from "./errors";
 import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth";
 import {config} from "./config";
 import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens";
-import {createLog, getLogs} from "./db/queries/logs";
+import {createLog, getLogs, getLogsAggregation} from "./db/queries/logs";
 import {logValidations} from "./utils/log-validations";
 import {healthy, healthyCheck} from "./middlewares/healthy-app";
 import {LogReq} from "./z-types";
@@ -18,7 +18,7 @@ export const app = express();
 app.use(express.json())
 app.use(healthyCheck)
 
-app.get("/", (req: express.Request, res: express.Response) => {
+app.use(`/`, (req: express.Request, res: express.Response) => {
     if(!healthy.ready) {
         res.status(500).send("<h1 style='text-align: center>Could not lesson to server</h1>")
         return
@@ -38,12 +38,12 @@ app.post(`/api/register`, async (req: express.Request, res: express.Response) =>
     const body: {
         username: string,
         password: string,
-        tenantName: string
+        tenantName?: string
     } = req.body
 
     body.password = await hashPassword(body.password)
 
-    const newUser = await createUser(body, body.tenantName)
+    const newUser = await createUser(body, body.tenantName || body.username)
     if (!newUser) {
         throw "Something went wrong, please try again!"
     }
@@ -58,9 +58,9 @@ app.post(`/api/login`, async (req: express.Request, res: express.Response) => {
     const body: {
         username: string,
         password: string,
-        tenantName: string,
+        tenantName?: string,
     } = req.body
-    const tenantName = body.tenantName
+    const tenantName = body.tenantName || body.username
     const user = await getUser(body.username, tenantName)
     if (!user) {
         throw "Something went wrong, please try again!"
@@ -77,8 +77,8 @@ app.post(`/api/login`, async (req: express.Request, res: express.Response) => {
 
     res.status(200).json({
         username: user.username,
-        accessToken: accessToken,
-        refreshToken: refreshTokenIns.token
+        token: accessToken,
+        refresh_token: refreshTokenIns.token
     })
 })
 
@@ -96,7 +96,7 @@ app.post(`${prefix}/refresh`, async (req: express.Request, res: express.Response
     }
     const token = makeJWT(refreshToken.userId || "", 3600, config.secret)
     res.status(200).json({
-        'accessToken': token,
+        token: token,
     })
 })
 
@@ -117,17 +117,14 @@ app.get(`${prefix}/logs`, async (req: express.Request, res: express.Response) =>
     const cursor = req.query.cursor as string
     const limit = req.query.limit as string
 
-    let limitNum = Number(limit);
+    let limitNum = limit ? Number(limit) : 100;
     if (isNaN(limitNum)){
         throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
     }
 
     let date: Date | null = null
-    let type: string = "next"
+    let type: "next" | "previous" | undefined = "next"
 
-    if(!limitNum) {
-        limitNum = 100
-    }
     if (limitNum > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
     }
@@ -206,6 +203,24 @@ app.post(`${prefix}/logs`, async (req: express.Request, res: express.Response) =
     res.status(200).json({
         accepted: result.accepted,
         rejected: result.rejected
+    })
+})
+
+app.get(`${prefix}/logs/aggregate`, async (req: express.Request, res: express.Response) => {
+    const accessToken = getBearerToken(req)
+    const tenant = req.params.tenant as string
+    // let result: Aggregate[];
+    if(!config.secret) {
+        throw "Empty secret!"
+    }
+    try {
+       validateJWT(accessToken, config.secret)
+    } catch (e) {
+        throw new errors.UnauthorizedError("Invalid or expired token!")
+    }
+    let results = await getLogsAggregation(req, tenant)
+    res.status(200).json({
+        buckets: results
     })
 })
 

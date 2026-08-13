@@ -1,26 +1,6 @@
 import {LogReq, logSchema} from "../z-types";
 import express from "express";
 
-type Error = {
-    code: string,
-    path: [number, string],
-    message: string
-}
-
-type Detail = {
-    index: number,
-    reason: string
-}
-
-type result = {
-    accepted: number,
-    rejected: {
-        index: number,
-        reason: string
-    }[],
-    count: Record<number, number>
-}
-
 // check the validation of the response
 export function logValidations(req: express.Request): result {
     let jsonE
@@ -39,7 +19,7 @@ export function logValidations(req: express.Request): result {
     } catch (e) {
         if (e instanceof Error) {
             // store the details of each invalid log
-            jsonE = JSON.parse(e.message) as Error[]
+            jsonE = JSON.parse(e.message) as SError[]
         }
     }
 

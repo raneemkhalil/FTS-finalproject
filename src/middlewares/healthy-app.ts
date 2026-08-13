@@ -1,10 +1,7 @@
 import {checkDbConnection, checkMigrations, Status} from "../healthness";
 import express from "express";
 
-export let healthy : {
-    ready: boolean,
-    details: Record<string, any>
-} = {
+export let healthy : Healthy = {
     ready: true,
     details: {}
 }

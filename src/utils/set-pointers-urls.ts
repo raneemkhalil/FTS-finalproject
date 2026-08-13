@@ -1,21 +1,6 @@
 import crypto from "node:crypto";
-import {LogResponse} from "../db/queries/logs";
 
-
-export let pointers: {
-    next: {
-        cursor: string | null,
-        date: Date | null,
-        nextUrl: string | null,
-        type: "next"
-    },
-    previous: {
-        cursor: string | null,
-        date: Date | null,
-        prevUrl: string | null,
-        type: "previous"
-    }
-} = {
+export let pointers: Pointers = {
     next: {
         cursor: null,
         date: null,

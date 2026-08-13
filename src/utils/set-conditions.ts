@@ -1,10 +1,15 @@
 import express from "express";
 import errors from "../errors";
+import {Level} from "../db/queries/logs";
 
-export function setConditions(req: express.Request, date: Date | null, type: string) {
+export function setConditions(req: express.Request, date: Date | null, type: string | null) {
     const level = req.query.level as string
     const service = req.query.service as string
     const q = req.query.q as string
+
+    if (level && level !== Level.DEBUG && level !== Level.ERROR && level !== Level.INFO && level !== Level.WARN) {
+        throw new errors.BadRequestError("Level must be one of these values [error, debug, info, warn].")
+    }
 
     const since = req.query.since ? new Date(req.query.since as string) : undefined;
     const until = req.query.until ? new Date(req.query.until as string) : undefined;

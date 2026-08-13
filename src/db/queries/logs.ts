@@ -3,20 +3,14 @@ import {db} from "../index";
 import {LogReq} from "../../z-types";
 import express from "express";
 import {setConditions} from "../../utils/set-conditions";
+import errors from "../../errors";
+import {parseEpoch} from "../utils/parse-epoch";
 
 export enum Level {
     DEBUG = "debug",
     INFO = "info",
     WARN = "warn",
     ERROR = "error"
-}
-
-export type LogResponse = {
-    timestamp: Date,
-    level: string,
-    service: string,
-    message: string,
-    attributes: unknown
 }
 
 export async function createLog(userId: string, requestId: string, logsList: LogReq, tenant: string) {
@@ -44,4 +38,26 @@ export async function getLogs(date: Date | null, type: string, limit: number, te
     let conditions = setConditions(req, date, type)
     res = await db.execute(`SELECT time as timestamp, level, service_name as service, message, attributes FROM ${tenant}.logs WHERE ${conditions} ORDER BY time DESC LIMIT ${limit}`)
     return res
+}
+
+export async function getLogsAggregation(req: express.Request, tenant: string) {
+    const bucket = req.query.bucket as string
+    let groupBy = req.query.group_by as string
+    const {since, until} = req.query
+    if (!since) {
+        throw new errors.BadRequestError("Since parameter is required.")
+    }
+    if (!until) {
+        throw new errors.BadRequestError("Until parameter is required.")
+    }
+    if (!bucket) {
+        throw new errors.BadRequestError("Bucket parameter is required.")
+    }
+    const conditions = setConditions(req, null, null)
+    const epochSecondes = parseEpoch(bucket)
+    if (!groupBy) {
+        return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, null as group, COUNT(*) from ${tenant}.logs WHERE ${conditions} GROUP BY start_date ORDER BY start_date ASC`)
+    }
+    groupBy = groupBy.replace("service", "service_name")
+    return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, ${groupBy} as group, COUNT(*) from ${tenant}.logs WHERE ${conditions} GROUP BY ${groupBy}, start_date ORDER BY start_date ASC`)
 }
