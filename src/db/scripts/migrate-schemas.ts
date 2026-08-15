@@ -1,11 +1,11 @@
 import postgres from "postgres";
-import {config} from "../../config";
+import {config} from "../../config.js";
 import {drizzle} from "drizzle-orm/postgres-js";
-import * as schema from "../schema";
+import * as schema from "../schema.js";
 import {sql} from "drizzle-orm";
-import { tenants } from "../schema";
-import {getMigrations, migrate} from "./helper"
-import {dbType} from "../index";
+import { tenants } from "../schema.js";
+import {getMigrations, migrate} from "./helper.js"
+import {dbType} from "../index.js";
 
 
 async function addPartitionExtension(db: dbType, tenant: string) {

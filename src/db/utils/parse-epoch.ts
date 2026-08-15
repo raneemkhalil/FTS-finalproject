@@ -1,4 +1,4 @@
-import errors from "../../errors";
+import errors from "../../errors.js";
 
 export function parseEpoch(bucket: string) {
     const regex = /^(\d+)(m|h|d)$/;

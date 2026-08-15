@@ -1,4 +1,4 @@
-type Journal = {
+export type Journal = {
     entries: {
         idx: number,
         when: number,
@@ -6,7 +6,7 @@ type Journal = {
         breakpoints: boolean
     }[]
 }
-type LogResponse = {
+export type LogResponse = {
     id: string,
     timestamp: string | null,
     level: string,
@@ -14,20 +14,20 @@ type LogResponse = {
     message: string,
     attributes: unknown
 }
-type Healthy = {
+export type Healthy = {
     ready: boolean,
     details: Record<string, any>
 }
-type SError = {
+export type SError = {
     code: string,
     path: [number, string],
     message: string
 }
-type Detail = {
+export type Detail = {
     index: number,
     reason: string
 }
-type result = {
+export type result = {
     accepted: number,
     rejected: {
         index: number,
@@ -35,7 +35,7 @@ type result = {
     }[],
     count: Record<number, number>
 }
-type Pointers = {
+export type Pointers = {
     next: {
         cursor: string | null,
         date: string | null,
@@ -49,13 +49,13 @@ type Pointers = {
         type: "previous"
     }
 }
-type Aggregate = {
+export type Aggregate = {
     start: string,
     group: string | null
     count: number,
 }
 
-type LogLookup =  {
+export type LogLookup =  {
     time: string;
     serviceName: string;
     userId: string | number;

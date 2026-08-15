@@ -1,5 +1,5 @@
-import {RefreshToken, refreshTokensTable} from "../schema";
-import {db} from "../index";
+import {RefreshToken, refreshTokensTable} from "../schema.js";
+import {db} from "../index.js";
 import {eq} from "drizzle-orm";
 
 export async function saveRefreshToken(userId: string, tenantName: string, token: string) {

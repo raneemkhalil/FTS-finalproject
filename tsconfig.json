@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "esnext",
-    "module": "esnext",
-    "rootDir": "./src",
     "outDir": "./dist",
+    "rootDir": "./src",
+    "target": "esnext",
+    "module": "NodeNext",
     "strict": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": ["node", "express"]

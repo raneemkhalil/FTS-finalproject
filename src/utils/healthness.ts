@@ -1,10 +1,10 @@
 import postgres from "postgres";
 import {drizzle} from "drizzle-orm/postgres-js";
-import * as schema from "../db/schema";
-import {config} from "../config";
+import * as schema from "../db/schema.js";
+import {config} from "../config.js";
 import {sql} from "drizzle-orm";
-import {migratePublic} from "../db/scripts/migrate-shared";
-import {migrateSchema} from "../db/scripts/migrate-schemas";
+import {migratePublic} from "../db/scripts/migrate-shared.js";
+import {migrateSchema} from "../db/scripts/migrate-schemas.js";
 
 
 export enum Status {

@@ -1,5 +1,5 @@
 import express from "express";
-import errors from "../errors";
+import errors from "../errors.js";
 
 export default function errorsHandling (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) {
     if (err instanceof errors.UnauthorizedError) {

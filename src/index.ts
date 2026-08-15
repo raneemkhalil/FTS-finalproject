@@ -1,18 +1,18 @@
 import express from "express";
-import errorsHandling from "./middlewares/errors-handling";
-import {createUser, getUser} from "./db/queries/users";
-import errors from "./errors";
-import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth";
-import {config} from "./config";
-import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens";
-import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs";
-import {logValidations} from "./utils/log-validations";
-import {healthy, healthyCheck} from "./middlewares/healthy-app";
-import {LogReq} from "./z-types";
-import {pointers, setPointersUrls} from "./utils/set-pointers-urls";
+import errorsHandling from "./middlewares/errors-handling.js";
+import {createUser, getUser} from "./db/queries/users.js";
+import errors from "./errors.js";
+import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth.js";
+import {config} from "./config.js";
+import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens.js";
+import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js";
+import {logValidations} from "./utils/log-validations.js";
+import {healthy, healthyCheck} from "./middlewares/healthy-app.js";
+import {LogReq} from "./z-types.js";
+import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
 import crypto from "node:crypto";
-import {migrateEachTenant} from "./db/scripts/migrate-schemas";
-import {db} from "./db";
+import {migrateEachTenant} from "./db/scripts/migrate-schemas.js";
+import {db} from "./db/index.js";
 
 export const app = express();
 // Increase JSON body parser limit (default is '100kb')
@@ -133,7 +133,7 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
     }
 
     let date: string | null = null
-    let type: "next" | "previous" | undefined = "next"
+    let type: "next" | "previous" = "next"
 
     if (limitNum > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")

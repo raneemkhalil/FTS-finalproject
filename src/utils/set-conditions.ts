@@ -1,6 +1,6 @@
 import express from "express";
-import errors from "../errors";
-import {Level} from "../db/queries/logs";
+import errors from "../errors.js";
+import {Level} from "../db/queries/logs.js";
 
 export function setConditions(req: express.Request, date: string | null, type: string | null) {
     const level = req.query.level as string

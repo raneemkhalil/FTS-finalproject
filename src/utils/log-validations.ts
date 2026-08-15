@@ -1,6 +1,7 @@
-import {LogReq, logSchema} from "../z-types";
+import {LogReq, logSchema} from "../z-types.js";
 import express from "express";
-import errors from "../errors";
+import errors from "../errors.js";
+import {Detail, result, SError} from "../types.js";
 
 // check the validation of the response
 export function logValidations(req: express.Request): result {

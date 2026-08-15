@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import {LogResponse, Pointers} from "../types.js";
 
 export let pointers: Pointers = {
     next: {

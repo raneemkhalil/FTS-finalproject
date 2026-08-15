@@ -1,10 +1,11 @@
 import {sql} from "drizzle-orm";
 import {MigrationMeta} from "drizzle-orm/migrator";
-import {dbType} from "../index";
+import {dbType} from "../index.js";
 import path from "node:path";
 import fs from "node:fs";
 import {createHash} from "node:crypto";
-import {config} from "../../config";
+import {config} from "../../config.js";
+import {Journal} from "../../types.js";
 
 const DRIZZLE_STATEMENT_BREAKPOINT = "--> statement-breakpoint";
 const TENANT_MIGRATIONS_SCHEMA = "template";

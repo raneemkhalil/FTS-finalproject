@@ -1,5 +1,5 @@
-import {User, usersTable} from "../schema";
-import {db} from "../index";
+import {User, usersTable} from "../schema.js";
+import {db} from "../index.js";
 import {eq} from "drizzle-orm";
 
 

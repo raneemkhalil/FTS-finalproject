@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npx tsc",
     "makemigrations": "npx drizzle-kit generate",
-    "migrate-shared": "tsx src/db/scripts/migrate-shared.ts",
-    "migrate-schemas": "tsx src/db/scripts/migrate-schemas.ts",
-    "create-tenant": "tsx src/db/scripts/create-tenant.ts",
-    "generate-logs": "tsx src/scripts/generate-logs.ts",
-    "server": "tsx src/index.ts",
+    "migrate-shared": "node dist/db/scripts/migrate-shared.js",
+    "migrate-schemas": "node dist/db/scripts/migrate-schemas.js",
+    "create-tenant": "node dist/db/scripts/create-tenant.js",
+    "generate-logs": "node dist/scripts/generate-logs.js",
+    "server": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -31,7 +32,6 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "tsx": "^4.23.11",
     "argon2": "^0.45.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",

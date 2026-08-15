@@ -1,6 +1,6 @@
 import {refine, z} from "zod";
 import { DateTime } from 'luxon';
-import {Level} from "./db/queries/logs";
+import {Level} from "./db/queries/logs.js";
 
 
 const isoTimestamp = z.string().refine((s) => {

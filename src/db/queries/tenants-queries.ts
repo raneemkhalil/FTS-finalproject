@@ -1,7 +1,7 @@
-import { db } from '../index'
+import { db } from '../index.js'
 import { Request } from "express"
-import errors from "../../errors";
-import {tenants, Tenant} from "../schema";
+import errors from "../../errors.js";
+import {tenants, Tenant} from "../schema.js";
 import {eq} from "drizzle-orm";
 
 export async function getTenant(req: Request) {

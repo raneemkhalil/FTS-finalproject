@@ -1,12 +1,13 @@
-import {Log, logsTable} from "../schema";
-import {db} from "../index";
-import {LogReq} from "../../z-types";
+import {Log, logsTable} from "../schema.js";
+import {db} from "../index.js";
+import {LogReq} from "../../z-types.js";
 import express from "express";
-import {setConditions} from "../../utils/set-conditions";
-import errors from "../../errors";
-import {parseEpoch} from "../utils/parse-epoch";
-import {decodeLookupId} from "../utils/log-lookup";
+import {setConditions} from "../../utils/set-conditions.js";
+import errors from "../../errors.js";
+import {parseEpoch} from "../utils/parse-epoch.js";
+import {decodeLookupId} from "../utils/log-lookup.js";
 import {and, eq} from "drizzle-orm";
+import {LogResponse} from "../../types.js";
 
 export enum Level {
     DEBUG = "debug",

@@ -1,8 +1,8 @@
 import postgres from "postgres";
-import {config} from "../../config";
-import * as schema from "../schema"
+import {config} from "../../config.js";
+import * as schema from "../schema.js"
 import {drizzle} from "drizzle-orm/postgres-js";
-import {getMigrations, migrate} from "./helper"
+import {getMigrations, migrate} from "./helper.js"
 
 
 export async function migratePublic() {

@@ -1,5 +1,6 @@
-import {checkDbConnection, checkMigrations, Status} from "../utils/healthness";
+import {checkDbConnection, checkMigrations, Status} from "../utils/healthness.js";
 import express from "express";
+import {Healthy} from "../types.js";
 
 export let healthy : Healthy = {
     ready: true,

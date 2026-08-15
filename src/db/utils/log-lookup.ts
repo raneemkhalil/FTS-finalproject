@@ -1,4 +1,5 @@
-import errors from "../../errors";
+import errors from "../../errors.js";
+import {LogLookup} from "../../types.js";
 
 /**
  * Encodes multiple values into a single web-safe string.
