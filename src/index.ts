@@ -21,8 +21,6 @@ app.use(express.json({ limit: '50mb' }));
 // Increase URL-encoded payload limit if accepting form submissions
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use(healthyCheck)
-
 app.get(`/`, (req: express.Request, res: express.Response) => {
     if(!healthy.ready) {
         res.status(500).send("<h1 style='text-align: center>Could not lesson to server</h1>")
@@ -31,7 +29,7 @@ app.get(`/`, (req: express.Request, res: express.Response) => {
     res.send("<h1 style='text-align: center>Welcome to our server</h1>")
 })
 
-app.get("/health", (req: express.Request, res: express.Response) => {
+app.get("/health", healthyCheck, (req: express.Request, res: express.Response) => {
     if(!healthy.ready) {
         res.status(500).json(healthy.details)
         return
