@@ -3,9 +3,11 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const secret = process.env.SECRET
+const port = process.env.PORT
+const host = process.env.HOST
 
 const dbCredential = {
-    host: "localhost",
+    host: host ? host : "localhost",
     user: "postgres",
     password: "1234",
     port: 5432,
@@ -19,5 +21,6 @@ const migrationsConfig = {
 export const config = {
     dbCredential: dbCredential,
     migrationsConfig: migrationsConfig,
-    secret: secret
+    secret: secret,
+    port: port
 }

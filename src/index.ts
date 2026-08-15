@@ -252,6 +252,6 @@ app.post("/logs", async (req: express.Request, res: express.Response) => {
 })
 
 app.use(errorsHandling)
-app.listen(8080, () => {
-    console.log("Server running at http://localhost:8080");
+app.listen(config.port, () => {
+    console.log(`Server running at http://localhost:${config.port}`);
 });
