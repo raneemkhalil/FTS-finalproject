@@ -5,6 +5,9 @@ dotenv.config()
 const secret = process.env.SECRET
 const port = process.env.PORT
 const host = process.env.HOST
+const auth_enabled = process.env.AUTH_ENABLED
+const loadgen_api_key = process.env.LOADGEN_API_KEY
+
 
 const dbCredential = {
     host: host ? host : "localhost",
@@ -18,9 +21,12 @@ const migrationsConfig = {
     migrationsFolder: "src/db/migrations"
 }
 
-export const config = {
+export let config = {
     dbCredential: dbCredential,
     migrationsConfig: migrationsConfig,
     secret: secret,
-    port: port
+    port: port,
+    token: loadgen_api_key ? loadgen_api_key : "",
+    auth_enabled: auth_enabled === "true",
+    default_tenant: "default"
 }

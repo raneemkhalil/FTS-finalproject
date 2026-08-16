@@ -9,6 +9,7 @@
     "migrate-shared": "node dist/db/scripts/migrate-shared.js",
     "migrate-schemas": "node dist/db/scripts/migrate-schemas.js",
     "create-tenant": "node dist/db/scripts/create-tenant.js",
+    "setup": "node dist/scripts/setup.js",
     "generate-logs": "node dist/scripts/generate-logs.js",
     "server": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

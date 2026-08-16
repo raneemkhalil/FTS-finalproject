@@ -3,7 +3,7 @@ import {config} from "../../config.js";
 import {drizzle} from "drizzle-orm/postgres-js";
 import * as schema from "../schema.js";
 import {sql} from "drizzle-orm";
-import { tenants } from "../schema.js";
+import {tenants} from "../schema.js";
 import {getMigrations, migrate} from "./helper.js"
 import {dbType} from "../index.js";
 

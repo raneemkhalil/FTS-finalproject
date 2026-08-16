@@ -58,7 +58,6 @@ export type Aggregate = {
 export type LogLookup =  {
     time: string;
     serviceName: string;
-    userId: string | number;
     requestId: string;
 }
 

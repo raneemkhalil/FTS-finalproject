@@ -1,3 +1,4 @@
+--> statement-breakpoint
 CREATE TABLE "tenants" (
 	"tenant_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_name" text NOT NULL,

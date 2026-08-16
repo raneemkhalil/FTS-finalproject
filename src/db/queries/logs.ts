@@ -16,7 +16,7 @@ export enum Level {
     ERROR = "error"
 }
 
-export async function createLog(userId: string, requestId: string, logsList: LogReq, tenant: string) {
+export async function createLog(requestId: string, logsList: LogReq, tenant: string) {
     const logs = logsTable(tenant);
 
     let logsListTemp = logsList.map(value => ({
@@ -25,7 +25,6 @@ export async function createLog(userId: string, requestId: string, logsList: Log
         message: value.message,
         level: value.level,
         attributes: value.attributes,
-        userId: userId,
         requestId: requestId
     }))
 
@@ -43,7 +42,7 @@ export async function getLogs(date: string | null, type: string, limit: number, 
     let sql = `
         SELECT 
             encode(
-                convert_to(CONCAT(time, '|', service_name, '|', user_id, '|', request_id), 'UTF8'), 
+                convert_to(CONCAT(time, '|', service_name, '|', request_id), 'UTF8'), 
                 'hex'
             ) AS id, 
             time as timestamp, 
@@ -51,7 +50,7 @@ export async function getLogs(date: string | null, type: string, limit: number, 
             service_name as service, 
             message, 
             attributes 
-        FROM ${tenant}.logs 
+        FROM "${tenant}"."logs" 
     `;
 
     if (conditions) {
@@ -80,21 +79,20 @@ export async function getLogsAggregation(req: express.Request, tenant: string) {
     const conditions = setConditions(req, null, null)
     const epochSecondes = parseEpoch(bucket)
     if (!groupBy) {
-        return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, null as group, COUNT(*) from ${tenant}.logs WHERE ${conditions} GROUP BY start_date ORDER BY start_date ASC`)
+        return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, null as group, COUNT(*) from "${tenant}"."logs" WHERE ${conditions} GROUP BY start_date ORDER BY start_date ASC`)
     }
     groupBy = groupBy.replace("service", "service_name")
-    return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, ${groupBy} as group, COUNT(*) from ${tenant}.logs WHERE ${conditions} GROUP BY ${groupBy}, start_date ORDER BY start_date ASC`)
+    return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start_date, ${groupBy} as group, COUNT(*) from "${tenant}"."logs" WHERE ${conditions} GROUP BY ${groupBy}, start_date ORDER BY start_date ASC`)
 }
 
 export async function getLogByLookup(lookup: string, tenant: string) {
     const logs = logsTable(tenant)
-    const { time, serviceName, userId, requestId } = decodeLookupId(lookup)
+    const { time, serviceName, requestId } = decodeLookupId(lookup)
     const datetime = new Date(time)
 
     const [log]: Log[] = await db.select().from(logs).where(and(
         eq(logs.time, datetime),
         eq(logs.serviceName, serviceName),
-        eq(logs.userId, userId as string),
         eq(logs.requestId, requestId)
     ))
     return {

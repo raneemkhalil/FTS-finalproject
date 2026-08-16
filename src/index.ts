@@ -1,18 +1,16 @@
 import express from "express";
 import errorsHandling from "./middlewares/errors-handling.js";
-import {createUser, getUser} from "./db/queries/users.js";
 import errors from "./errors.js";
-import {checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT} from "./utils/auth.js";
+import {getBearerToken} from "./utils/auth.js";
 import {config} from "./config.js";
-import {getRefreshToken, revokeRefreshToken, saveRefreshToken} from "./db/queries/refresh-tokens.js";
 import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js";
 import {logValidations} from "./utils/log-validations.js";
 import {healthy, healthyCheck} from "./middlewares/healthy-app.js";
 import {LogReq} from "./z-types.js";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
 import crypto from "node:crypto";
-import {migrateEachTenant} from "./db/scripts/migrate-schemas.js";
-import {db} from "./db/index.js";
+import {authCheck} from "./middlewares/auth-check.js";
+
 
 export const app = express();
 // Increase JSON body parser limit (default is '100kb')
@@ -37,93 +35,96 @@ app.get("/health", healthyCheck, (req: express.Request, res: express.Response) =
     res.status(200).json({...healthy.details, info: "Server is ready to listen"})
 })
 
-app.post("/register", async (req: express.Request, res: express.Response) => {
-    const body: {
-        username: string,
-        password: string,
-        tenantName?: string
-    } = req.body
+// app.post("/register", async (req: express.Request, res: express.Response) => {
+//     const body: {
+//         username: string,
+//         password: string,
+//         tenantName?: string
+//     } = req.body
+//
+//     const tenantName = body.tenantName || body.username
+//
+//     try {
+//         await migrateEachTenant(db, tenantName)
+//         console.log(`Tenant created: name="${tenantName}", schema="${tenantName}"`);
+//     } catch (err) {
+//         console.error("Failed to create tenant:", err);
+//         throw err;
+//     }
+//
+//     body.password = await hashPassword(body.password)
+//
+//     const newUser = await createUser(body, tenantName)
+//     if (!newUser) {
+//         throw "Something went wrong, please try again!"
+//     }
+//
+//     res.status(201).json({
+//         message: "Successfully registered, please login again.",
+//         username: newUser.username
+//     })
+// })
+//
+// app.post("/login", async (req: express.Request, res: express.Response) => {
+//     const body: {
+//         username: string,
+//         password: string,
+//         tenantName?: string,
+//     } = req.body
+//     const tenantName = body.tenantName || body.username
+//     const user = await getUser(body.username, tenantName)
+//     if (!user) {
+//         throw "Something went wrong, please try again!"
+//     }
+//     if (!await checkPasswordHash(body.password, user.password)) {
+//         throw new errors.UnauthorizedError("Invalid username or password")
+//     }
+//     if (!config.secret) {
+//         throw "Empty secret"
+//     }
+//     const refreshToken = makeRefreshToken();
+//     const refreshTokenIns = await saveRefreshToken(user.id, tenantName, refreshToken)
+//     const accessToken = makeJWT(user.id, 3600, config.secret)
+//
+//     res.status(200).json({
+//         username: user.username,
+//         token: tenantName + " " + accessToken,
+//         refresh_token: tenantName + " " + refreshTokenIns.token
+//     })
+// })
+//
+// app.post("/refresh", async (req: express.Request, res: express.Response) => {
+//     const [tenantName, requiredRefreshToken] = getBearerToken(req)
+//     const refreshToken = await getRefreshToken(requiredRefreshToken, tenantName)
+//     const date = new Date();
+//     if (!refreshToken || refreshToken.expiresAt < date || refreshToken.revokedAt !== null) {
+//         res.status(401).send()
+//         return
+//     }
+//     if (!config.secret) {
+//         throw "Empty secret"
+//     }
+//     const token = makeJWT(refreshToken.userId || "", 3600, config.secret)
+//     res.status(200).json({
+//         token: tenantName + " " + token,
+//     })
+// })
+//
+// app.post("/revoke", async (req: express.Request, res: express.Response) => {
+//     const [tenantName, requiredRefreshToken] = getBearerToken(req)
+//     try {
+//         await revokeRefreshToken(requiredRefreshToken, tenantName)
+//     } catch (e) {
+//         throw e;
+//     }
+//     res.status(204).send()
+// })
 
-    const tenantName = body.tenantName || body.username
-
-    try {
-        await migrateEachTenant(db, tenantName)
-        console.log(`Tenant created: name="${tenantName}", schema="${tenantName}"`);
-    } catch (err) {
-        console.error("Failed to create tenant:", err);
-        throw err;
+app.get("/logs", authCheck, async (req: express.Request, res: express.Response) => {
+    let tenantName = config.default_tenant
+    if(config.auth_enabled) {
+        [tenantName] = getBearerToken(req)
     }
-
-    body.password = await hashPassword(body.password)
-
-    const newUser = await createUser(body, tenantName)
-    if (!newUser) {
-        throw "Something went wrong, please try again!"
-    }
-
-    res.status(201).json({
-        message: "Successfully registered, please login again.",
-        username: newUser.username
-    })
-})
-
-app.post("/login", async (req: express.Request, res: express.Response) => {
-    const body: {
-        username: string,
-        password: string,
-        tenantName?: string,
-    } = req.body
-    const tenantName = body.tenantName || body.username
-    const user = await getUser(body.username, tenantName)
-    if (!user) {
-        throw "Something went wrong, please try again!"
-    }
-    if (!await checkPasswordHash(body.password, user.password)) {
-        throw new errors.UnauthorizedError("Invalid username or password")
-    }
-    if (!config.secret) {
-        throw "Empty secret"
-    }
-    const refreshToken = makeRefreshToken();
-    const refreshTokenIns = await saveRefreshToken(user.id, tenantName, refreshToken)
-    const accessToken = makeJWT(user.id, 3600, config.secret)
-
-    res.status(200).json({
-        username: user.username,
-        token: tenantName + " " + accessToken,
-        refresh_token: tenantName + " " + refreshTokenIns.token
-    })
-})
-
-app.post("/refresh", async (req: express.Request, res: express.Response) => {
-    const [tenantName, requiredRefreshToken] = getBearerToken(req)
-    const refreshToken = await getRefreshToken(requiredRefreshToken, tenantName)
-    const date = new Date();
-    if (!refreshToken || refreshToken.expiresAt < date || refreshToken.revokedAt !== null) {
-        res.status(401).send()
-        return
-    }
-    if (!config.secret) {
-        throw "Empty secret"
-    }
-    const token = makeJWT(refreshToken.userId || "", 3600, config.secret)
-    res.status(200).json({
-        token: tenantName + " " + token,
-    })
-})
-
-app.post("/revoke", async (req: express.Request, res: express.Response) => {
-    const [tenantName, requiredRefreshToken] = getBearerToken(req)
-    try {
-        await revokeRefreshToken(requiredRefreshToken, tenantName)
-    } catch (e) {
-        throw e;
-    }
-    res.status(204).send()
-})
-
-app.get("/logs", async (req: express.Request, res: express.Response) => {
-    const [tenantName, accessToken] = getBearerToken(req)
     const cursor = req.query.cursor as string
     const limit = req.query.limit as string
 
@@ -137,15 +138,6 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
 
     if (limitNum > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
-    }
-
-    if(!config.secret) {
-        throw "Empty secret!"
-    }
-    try {
-       validateJWT(accessToken, config.secret)
-    } catch (e) {
-        throw new errors.UnauthorizedError("Invalid or expired token!")
     }
 
     // check the validation of the cursor if exist
@@ -183,15 +175,10 @@ app.get("/logs", async (req: express.Request, res: express.Response) => {
     })
 })
 
-app.get("/logs/aggregate", async (req: express.Request, res: express.Response) => {
-    const [tenant, accessToken] = getBearerToken(req)
-    if(!config.secret) {
-        throw "Empty secret!"
-    }
-    try {
-       validateJWT(accessToken, config.secret)
-    } catch (e) {
-        throw new errors.UnauthorizedError("Invalid or expired token!")
+app.get("/logs/aggregate", authCheck, async (req: express.Request, res: express.Response) => {
+    let tenant = config.default_tenant
+    if(config.auth_enabled) {
+        [tenant] = getBearerToken(req)
     }
     let results = await getLogsAggregation(req, tenant)
     res.status(200).json({
@@ -199,25 +186,22 @@ app.get("/logs/aggregate", async (req: express.Request, res: express.Response) =
     })
 })
 
-app.get("/logs/:id", async (req: express.Request, res: express.Response) => {
-    const [tenantName, accessToken] = getBearerToken(req)
+app.get("/logs/:id", authCheck, async (req: express.Request, res: express.Response) => {
+    let tenantName = config.default_tenant
+    if(config.auth_enabled) {
+        [tenantName] = getBearerToken(req)
+    }
     const id = req.params.id as string
-
-    if (!config.secret) {
-        throw "Empty secret!"
-    }
-    try {
-        validateJWT(accessToken, config.secret)
-    } catch (e) {
-        throw new errors.UnauthorizedError("Invalid or expired token!")
-    }
     const log = await getLogByLookup(id, tenantName)
 
     res.status(200).json(log)
 })
 
-app.post("/logs", async (req: express.Request, res: express.Response) => {
-    const [tenantName, accessToken] = getBearerToken(req)
+app.post("/logs", authCheck, async (req: express.Request, res: express.Response) => {
+    let tenantName = config.default_tenant
+    if(config.auth_enabled) {
+        [tenantName] = getBearerToken(req)
+    }
     const result = logValidations(req)
 
     const body: {
@@ -231,18 +215,7 @@ app.post("/logs", async (req: express.Request, res: express.Response) => {
 
     const requestId = crypto.randomUUID()
 
-    let userId: string
-
-    if(!config.secret) {
-        throw "Empty secret!"
-    }
-    try {
-       userId = validateJWT(accessToken, config.secret)
-    } catch (e) {
-        throw new errors.UnauthorizedError("Invalid or expired token!")
-    }
-
-    await createLog(userId, requestId, logs, tenantName)
+    await createLog(requestId, logs, tenantName)
     res.status(200).json({
         accepted: result.accepted,
         rejected: result.rejected

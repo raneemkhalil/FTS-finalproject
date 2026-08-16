@@ -4,8 +4,8 @@ import {LogLookup} from "../../types.js";
 /**
  * Encodes multiple values into a single web-safe string.
  */
-export function createLookupId(time: string, serviceName: string, userId: string, requestId: string): string {
-    const rawPayload = `${time}|${serviceName}|${userId}|${requestId}`;
+export function createLookupId(time: string, serviceName: string, requestId: string): string {
+    const rawPayload = `${time}|${serviceName}|${requestId}`;
     return Buffer.from(rawPayload, 'utf8').toString('hex');
 }
 
@@ -14,11 +14,11 @@ export function createLookupId(time: string, serviceName: string, userId: string
  */
 export function decodeLookupId(lookupId: string): LogLookup {
     const decoded = Buffer.from(lookupId, 'hex').toString('utf8');
-    const [time, serviceName, userId, requestId] = decoded.split('|');
+    const [time, serviceName, requestId] = decoded.split('|');
 
-    if (!time || !serviceName || !userId || !requestId) {
+    if (!time || !serviceName || !requestId) {
         throw new errors.NotFoundError('Invalid lookup ID structure');
     }
 
-    return { time, serviceName, userId, requestId };
+    return { time, serviceName, requestId };
 }

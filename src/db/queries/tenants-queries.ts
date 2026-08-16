@@ -4,8 +4,7 @@ import errors from "../../errors.js";
 import {tenants, Tenant} from "../schema.js";
 import {eq} from "drizzle-orm";
 
-export async function getTenant(req: Request) {
-    const tenantName = req.header("x-tenant-name")
+export async function getTenant(tenantName: string) {
     if (!tenantName) {
         throw new errors.UnauthorizedError("Invalid Credential");
     }
