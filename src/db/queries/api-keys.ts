@@ -19,14 +19,3 @@ export async function getApiKey(token: string, tenantName: string) {
     const [apiKeyIns]: ApiKeys[] = await db.select().from(apiKey).where(eq(apiKey.token, token))
     return apiKeyIns
 }
-//
-// export async function revokeRefreshToken(token: string, tenantName: string) {
-//     const refreshTokens = refreshTokensTable(tenantName)
-//     try {
-//         await db.update(refreshTokens).set({
-//             revokedAt: new Date()
-//         }).where(eq(refreshTokens.token, token))
-//     } catch (e) {
-//         throw "There is problem in revoking refresh token"
-//     }
-// }
