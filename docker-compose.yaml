@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   db:
     image: timescale/timescaledb:latest-pg15
@@ -8,7 +7,7 @@ services:
       POSTGRES_DB: "logs"
     ports:
       - "5432:5432"
-    command: ["postgres", "-c", "shared_preload_libraries=timescaledb"]
+    command: ["postgres", "-c", "shared_preload_libraries=timescaledb", "-c",  "max_connections=200"]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d logs" ]
       interval: 5s
@@ -30,8 +29,7 @@ services:
       - fts-network
     ports:
       - "8080:80"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+    command: caddy reverse-proxy --from :80 --to api-1:8081 --to api-2:8082 --to api-3:8083
   db-migrate:
     image: 2241998/fts-final-migrate:latest
     container_name: db-migrate
@@ -39,6 +37,8 @@ services:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8084"
       HOST: "db"
+      AUTH_ENABLED: "true"
+      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
     depends_on:
       db:
         condition: service_healthy
@@ -51,13 +51,15 @@ services:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8081"
       HOST: "db"
+      AUTH_ENABLED: "true"
+      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     networks:
       - fts-network
     volumes:
-      - fts-api-1-vol:/app/src
+      - fts-api-1-vol:/app/dist
     deploy:
       resources:
         limits:
@@ -70,13 +72,15 @@ services:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8082"
       HOST: "db"
+      AUTH_ENABLED: "true"
+      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     networks:
       - fts-network
     volumes:
-      - fts-api-2-vol:/app/src
+      - fts-api-2-vol:/app/dist
     deploy:
       resources:
         limits:
@@ -89,13 +93,15 @@ services:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8083"
       HOST: "db"
+      AUTH_ENABLED: "true"
+      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     networks:
       - fts-network
     volumes:
-      - fts-api-3-vol:/app/src
+      - fts-api-3-vol:/app/dist
     deploy:
       resources:
         limits:
