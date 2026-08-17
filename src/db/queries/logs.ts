@@ -6,7 +6,7 @@ import {setConditions} from "../../utils/set-conditions.js";
 import errors from "../../errors.js";
 import {parseEpoch} from "../utils/parse-epoch.js";
 import {decodeLookupId} from "../utils/log-lookup.js";
-import {and, eq} from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import {LogResponse} from "../../types.js";
 
 export enum Level {
@@ -16,20 +16,39 @@ export enum Level {
     ERROR = "error"
 }
 
+// Helper function to split array into chunks
+function chunkArray<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+}
+
 export async function createLog(requestId: string, logsList: LogReq, tenant: string) {
     const logs = logsTable(tenant);
 
-    let logsListTemp = logsList.map(value => ({
-        time: new Date(value.timestamp),
-        serviceName: value.service,
-        message: value.message,
-        level: value.level,
-        attributes: value.attributes,
-        requestId: requestId
-    }))
+    const logsListTemp = logsList.map((value) => {
+        const parsedDate = new Date(value.timestamp);
+        return {
+            time: !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
+            serviceName: value.service ?? 'unknown',
+            message: value.message ?? '',
+            level: value.level ?? 'info',
+            attributes: value.attributes ?? {}, // Ensures JSON object is never undefined
+            requestId: requestId ?? null
+        };
+    });
 
-    const res = await Promise.all(logsListTemp.map(async (log) => {
-        const [r] = await db.insert(logs).values(log).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
+    // Perform chunked insertion
+    const BATCH_SIZE = 500; // 500 items * 6 fields = 3,000 parameters (well within limit)
+    const logBatches = chunkArray(logsListTemp, BATCH_SIZE);
+
+    for (const batch of logBatches) {
+        await db.insert(logs).values(batch);
+    }
+    const res = await Promise.all(logBatches.map(async (batch) => {
+        const [r] = await db.insert(logs).values(batch).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
         return r
     }))
     return res
