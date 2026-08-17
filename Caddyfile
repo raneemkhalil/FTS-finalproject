@@ -1,5 +1,0 @@
-localhost:80
-
-reverse_proxy api-1:8081 api-2:8082 api-3:8083 {
-	lb_policy       round_robin
-}

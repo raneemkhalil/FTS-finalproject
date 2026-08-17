@@ -1,0 +1,1 @@
+DROP INDEX "template"."logs_attribute_idx";
