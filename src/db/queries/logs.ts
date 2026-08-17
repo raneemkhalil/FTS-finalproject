@@ -45,7 +45,7 @@ export async function createLog(requestId: string, logsList: LogReq, tenant: str
     const logBatches = chunkArray(logsListTemp, BATCH_SIZE);
 
     for (const batch of logBatches) {
-        await db.insert(logs).values(batch);
+        await db.insert(logs).values(batch).onConflictDoNothing();
     }
 }
 
