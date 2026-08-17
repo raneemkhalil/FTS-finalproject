@@ -25,9 +25,7 @@ async function addPartitionExtension(db: dbType, tenant: string) {
         END IF;
         END $$;
     `)
-    await db.execute(sql`ALTER TABLE ${sql.identifier(tenant)}.${sql.identifier("logs")} SET (timescaledb.compress, timescaledb.compress_segmentby = 'service_name');`)
-    await db.execute(sql`SELECT add_compression_policy('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '7 days', if_not_exists => true);`)
-    await db.execute(sql`SELECT add_retention_policy('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '90 days', if_not_exists => true);`)
+    await db.execute(sql`SELECT add_retention_policy('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '32 days', if_not_exists => true);`)
 }
 
 export async function migrateEachTenant(db: dbType, tenant: string) {
