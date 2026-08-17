@@ -6,7 +6,7 @@ import {setConditions} from "../../utils/set-conditions.js";
 import errors from "../../errors.js";
 import {parseEpoch} from "../utils/parse-epoch.js";
 import {decodeLookupId} from "../utils/log-lookup.js";
-import {and, eq, sql} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {LogResponse} from "../../types.js";
 
 export enum Level {
@@ -47,11 +47,6 @@ export async function createLog(requestId: string, logsList: LogReq, tenant: str
     for (const batch of logBatches) {
         await db.insert(logs).values(batch);
     }
-    const res = await Promise.all(logBatches.map(async (batch) => {
-        const [r] = await db.insert(logs).values(batch).onConflictDoNothing().returning().catch((err) => {console.log(err); throw "Couldn't create the log."})
-        return r
-    }))
-    return res
 }
 
 export async function getLogs(date: string | null, type: string, limit: number, tenant: string, req: express.Request) {
