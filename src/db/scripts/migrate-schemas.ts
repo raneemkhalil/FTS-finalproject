@@ -17,7 +17,14 @@ async function addPartitionExtension(db: dbType, tenant: string) {
        number_partitions => 32,
        if_not_exists => true
     );`)
-    await db.execute(sql`SELECT set_chunk_time_interval('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '1 day');`)
+    await db.execute(`
+        DO $$
+        BEGIN
+        IF pg_try_advisory_xact_lock(hashtext('${tenant}_logs_chunk_interval')) THEN
+          PERFORM set_chunk_time_interval('"${tenant}"."logs"', INTERVAL '1 day');
+        END IF;
+        END $$;
+    `)
     await db.execute(sql`ALTER TABLE ${sql.identifier(tenant)}.${sql.identifier("logs")} SET (timescaledb.compress, timescaledb.compress_segmentby = 'service_name');`)
     await db.execute(sql`SELECT add_compression_policy('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '7 days', if_not_exists => true);`)
     await db.execute(sql`SELECT add_retention_policy('${sql.identifier(tenant)}.${sql.identifier("logs")}', INTERVAL '90 days', if_not_exists => true);`)

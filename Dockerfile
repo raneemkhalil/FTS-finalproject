@@ -41,9 +41,10 @@ RUN npm ci --omit=dev
 # Copy compiled JavaScript from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/db/migrations ./src/db/migrations
+COPY Caddyfile ./Caddyfile
 
 # Remove build tools afterward to keep container size small
 RUN apk del python3 make g++
 
-CMD ["sh", "-c", "npm run migrate-shared && npm run migrate-schemas"]
+CMD ["sh", "-c", "npm run migrate-shared && npm run setup acme"]
 #CMD ["npm", "run", "server"]

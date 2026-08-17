@@ -13,13 +13,11 @@ async function setup(tenant: string) {
         if (config.auth_enabled && config.token) {
             await migrateEachTenant(db, tenant)
             const apiKeys = apiKeysTable(tenantName);
-
             const createdDate = new Date();
-            const [res]: ApiKeys[] = await db.insert(apiKeys).values({
+            await db.insert(apiKeys).values({
                 createdAt: createdDate,
-                token: tenant + " " + config.token,
-            }).returning().onConflictDoNothing()
-            console.log(`Token was saved! - tokenId: ${res.token}`)
+                token: config.token,
+            }).onConflictDoNothing()
         } else {
             tenant = config.default_tenant
             await migrateEachTenant(db, tenant)

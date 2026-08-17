@@ -21,7 +21,7 @@ const migrationsConfig = {
     migrationsFolder: "src/db/migrations"
 }
 
-export let config = {
+export const config = {
     dbCredential: dbCredential,
     migrationsConfig: migrationsConfig,
     secret: secret,
