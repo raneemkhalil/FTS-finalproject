@@ -77,7 +77,7 @@ app.get("/logs", authCheck, paramValidations, async (req: express.Request, res: 
     })
 })
 
-app.get("/logs/aggregate", authCheck, async (req: express.Request, res: express.Response) => {
+app.get("/logs/aggregate", authCheck, paramValidations, async (req: express.Request, res: express.Response) => {
     let tenant = config.default_tenant
     if(config.auth_enabled) {
         [tenant] = getBearerToken(req)
