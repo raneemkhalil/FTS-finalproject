@@ -38,13 +38,11 @@ export type Result = {
 export type Pointers = {
     next: {
         cursor: string | null,
-        date: string | null,
         nextUrl: string | null,
         type: "next"
     },
     previous: {
         cursor: string | null,
-        date: string | null,
         prevUrl: string | null,
         type: "previous"
     }

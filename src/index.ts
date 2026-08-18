@@ -10,6 +10,7 @@ import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
 import crypto from "node:crypto";
 import {authCheck} from "./middlewares/auth-check.js";
 import {paramValidations} from "./middlewares/param-validations.js";
+import {decodeCursor} from "./db/utils/parse-cursor.js";
 
 
 export const app = express();
@@ -48,7 +49,7 @@ app.get("/logs", authCheck, paramValidations, async (req: express.Request, res: 
 
     // getting data due to cursor => date and type
     if (cursor) {
-        date = pointers.previous.cursor === cursor ? pointers.previous.date : pointers.next.date
+        date = decodeCursor(cursor)
         type = pointers.previous.cursor === cursor ? pointers.previous.type : pointers.next.type
     }
 

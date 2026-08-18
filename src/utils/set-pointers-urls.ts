@@ -1,16 +1,15 @@
 import crypto from "node:crypto";
 import {LogResponse, Pointers} from "../types.js";
+import {encodeCursor} from "../db/utils/parse-cursor.js";
 
 export let pointers: Pointers = {
     next: {
         cursor: null,
-        date: null,
         nextUrl: null,
         type: "next"
     },
     previous: {
         cursor: null,
-        date: null,
         prevUrl: null,
         type: "previous"
     }
@@ -38,14 +37,12 @@ export function setPointersUrls(logs: LogResponse[], limit: number, type: string
     }
 
     if (prevTime && pointers.next.cursor !== null) {
-        pointers.previous.cursor = crypto.randomBytes(32).toString("base64").replaceAll('+', '-')
-        pointers.previous.date = prevTime
+        pointers.previous.cursor = encodeCursor(prevTime)
         pointers.previous.prevUrl = type === "previous" && logsLength !== limit + 1 ? null : `http://localhost:8080${subUrl}&cursor=${pointers.previous.cursor}`
     }
 
     if (nextTime) {
-        pointers.next.cursor = type === "next" && logsLength !== limit + 1 ? null : crypto.randomBytes(32).toString("base64").replaceAll('+', '-')
-        pointers.next.date = nextTime
+        pointers.next.cursor = type === "next" && logsLength !== limit + 1 ? null : encodeCursor(nextTime)
         pointers.next.nextUrl = type === "next" && logsLength !== limit + 1 ? null : `http://localhost:8080${subUrl}&cursor=${pointers.next.cursor}`
     }
 }

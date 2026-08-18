@@ -1,8 +1,8 @@
 import express from "express";
-import {pointers} from "../utils/set-pointers-urls.js";
 import errors from "../errors.js";
 import {isoTimestamp} from "../z-types.js";
 import {Level} from "../db/queries/logs.js";
+import {decodeCursor} from "../db/utils/parse-cursor.js";
 
 export async function paramValidations (req: express.Request, res: express.Response, next: express.NextFunction) {
     const cursor = req.query.cursor as string
@@ -16,17 +16,18 @@ export async function paramValidations (req: express.Request, res: express.Respo
     if (limit && isNaN(Number(limit))){
         throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
     }
-    if (Number(limit) > 1000) {
+    if (limit && Number(limit) > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
+    }
+    if (limit && (Number(limit) < -1 || !Number.isInteger(Number(limit)))) {
+        throw new errors.BadRequestError("Invalid limit")
     }
 
     if (since) {
         try {
             isoTimestamp.parse(since)
         } catch (e) {
-            if (e instanceof Error)
-                throw new errors.BadRequestError(e.message)
-            else throw e
+            throw new errors.BadRequestError(`${e}`)
         }
     }
 
@@ -34,15 +35,22 @@ export async function paramValidations (req: express.Request, res: express.Respo
         try {
             isoTimestamp.parse(until)
         } catch (e) {
-            if (e instanceof Error)
-                throw new errors.BadRequestError(e.message)
-            else throw e
+            throw new errors.BadRequestError(`${e}`)
         }
     }
 
     // check the validation of the cursor if exist
-    if (cursor && pointers.previous.cursor !== cursor && pointers.next.cursor !== cursor) {
-        throw new errors.BadRequestError("Invalid or malformed cursor!")
+    if (cursor) {
+        const date = decodeCursor(cursor)
+        if (date) {
+            try {
+                isoTimestamp.parse(date)
+            } catch (e) {
+                throw new errors.BadRequestError(`${e}`)
+            }
+        } else {
+            throw new errors.BadRequestError("Invalid cursor")
+        }
     }
 
     if (level && (level !== Level.DEBUG && level !== Level.ERROR && level !== Level.INFO && level !== Level.WARN) || level === "") {
