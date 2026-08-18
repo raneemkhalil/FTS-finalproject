@@ -29,8 +29,24 @@ services:
           cpus: '1'
     volumes:
       - db-vol:/var/lib/postgresql/data
+  load-balancer:
+    image: caddy
+    container_name: fts-balancer
+    networks:
+      - fts-network
+    ports:
+      - "8080:80"
+    depends_on:
+      api-1:
+        condition: service_started
+      api-2:
+        condition: service_started
+      api-3:
+        condition: service_started
+    command: caddy reverse-proxy --from :80 --to api-1:8081 --to api-2:8082 --to api-3:8083
   db-migrate:
     image: 2241998/fts-final-migrate:latest
+    container_name: db-migrate
     environment:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8084"
@@ -42,23 +58,61 @@ services:
         condition: service_healthy
     networks:
       - fts-network
-  api:
+  api-1:
     image: 2241998/fts-final:latest
     environment:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
-      PORT: "8080"
+      PORT: "8081"
       HOST: "db"
       AUTH_ENABLED: "false"
       LOADGEN_API_KEY:
-    ports:
-      - "8080:8080"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     networks:
       - fts-network
     volumes:
-      - api-vol:/app/dist
+      - api-1-vol:/app/dist
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+  api-2:
+    image: 2241998/fts-final:latest
+    environment:
+      SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
+      PORT: "8082"
+      HOST: "db"
+      AUTH_ENABLED: "false"
+      LOADGEN_API_KEY:
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks:
+      - fts-network
+    volumes:
+      - api-2-vol:/app/dist
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+  api-3:
+    image: 2241998/fts-final:latest
+    environment:
+      SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
+      PORT: "8083"
+      HOST: "db"
+      AUTH_ENABLED: "false"
+      LOADGEN_API_KEY:
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    networks:
+      - fts-network
+    volumes:
+      - api-3-vol:/app/dist
     deploy:
       resources:
         limits:
@@ -71,4 +125,6 @@ networks:
 
 volumes:
   db-vol:
-  api-vol:
+  api-1-vol:
+  api-2-vol:
+  api-3-vol:
