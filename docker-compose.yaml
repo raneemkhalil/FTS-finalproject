@@ -1,13 +1,20 @@
 services:
   db:
     image: timescale/timescaledb:latest-pg15
-    container_name: fts-db
     environment:
       POSTGRES_PASSWORD: "1234"
       POSTGRES_DB: "logs"
     ports:
       - "5432:5432"
-    command: ["postgres", "-c", "shared_preload_libraries=timescaledb", "-c",  "max_connections=200"]
+    command: [
+      "postgres",
+      "-c", "shared_preload_libraries=timescaledb",
+      "-c",  "max_connections=100",
+      "-c", "shared_buffers=256MB",      # Allocates dedicated RAM for caching (25% of 1G limit)
+      "-c", "work_mem=4MB",             # Speeds up sorting/aggregations without CPU thrashing
+      "-c", "maintenance_work_mem=64MB", # Speeds up hypertable chunk creation and indexing
+      "-c", "synchronous_commit=off"     # Dramatically cuts write latency & CPU waiting time
+    ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d logs" ]
       interval: 5s
@@ -21,87 +28,35 @@ services:
           memory: 1G
           cpus: '1'
     volumes:
-      - fts-db-vol:/var/lib/postgresql/data
-  load-balancer:
-    image: caddy
-    container_name: fts-balancer
-    networks:
-      - fts-network
-    ports:
-      - "8080:80"
-    command: caddy reverse-proxy --from :80 --to api-1:8081 --to api-2:8082 --to api-3:8083
+      - db-vol:/var/lib/postgresql/data
   db-migrate:
     image: 2241998/fts-final-migrate:latest
-    container_name: db-migrate
     environment:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8084"
       HOST: "db"
-      AUTH_ENABLED: "true"
-      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
+      AUTH_ENABLED: "false"
+      LOADGEN_API_KEY:
     depends_on:
       db:
         condition: service_healthy
     networks:
       - fts-network
-  api-1:
+  api:
     image: 2241998/fts-final:latest
-    container_name: api-1
     environment:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
       PORT: "8081"
       HOST: "db"
-      AUTH_ENABLED: "true"
-      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
+      AUTH_ENABLED: "false"
+      LOADGEN_API_KEY:
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     networks:
       - fts-network
     volumes:
-      - fts-api-1-vol:/app/dist
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.5'
-  api-2:
-    image: 2241998/fts-final:latest
-    container_name: api-2
-    environment:
-      SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
-      PORT: "8082"
-      HOST: "db"
-      AUTH_ENABLED: "true"
-      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-    networks:
-      - fts-network
-    volumes:
-      - fts-api-2-vol:/app/dist
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.5'
-  api-3:
-    image: 2241998/fts-final:latest
-    container_name: api-3
-    environment:
-      SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
-      PORT: "8083"
-      HOST: "db"
-      AUTH_ENABLED: "true"
-      LOADGEN_API_KEY: "mJqXE47fOZaadFOLVleFBTBl8Eo65CdW"
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-    networks:
-      - fts-network
-    volumes:
-      - fts-api-3-vol:/app/dist
+      - api-vol:/app/dist
     deploy:
       resources:
         limits:
@@ -113,7 +68,5 @@ networks:
     driver: bridge
 
 volumes:
-  fts-db-vol:
-  fts-api-1-vol:
-  fts-api-2-vol:
-  fts-api-3-vol:
+  db-vol:
+  api-vol:
