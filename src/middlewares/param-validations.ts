@@ -10,6 +10,8 @@ export async function paramValidations (req: express.Request, res: express.Respo
     const since = req.query.since as string
     const until = req.query.until as string
     const level = req.query.level as string
+    const service = req.query.service as string
+    const  q = req.query.q as string
 
     if (limit && isNaN(Number(limit))){
         throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
@@ -46,6 +48,11 @@ export async function paramValidations (req: express.Request, res: express.Respo
     if (level && (level !== Level.DEBUG && level !== Level.ERROR && level !== Level.INFO && level !== Level.WARN) || level === "") {
         throw new errors.BadRequestError("Level must be one of these values [error, debug, info, warn].")
     }
+
+    if (service === "")
+        throw new errors.BadRequestError("Service must not be empty")
+    if (q === "")
+        throw new errors.BadRequestError("Message must not be empty")
 
     next()
 }
