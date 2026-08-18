@@ -93,10 +93,10 @@ export async function getLogsAggregation(req: express.Request, tenant: string) {
     const conditions = setConditions(req, null, null)
     const epochSecondes = parseEpoch(bucket)
     if (!groupBy) {
-        return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, null as group, COUNT(*) from "${tenant}"."logs" WHERE ${conditions} GROUP BY start ORDER BY start ASC`)
+        return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, null as group, COALESCE(COUNT(*), 0)::int AS count from "${tenant}"."logs" WHERE ${conditions} GROUP BY start ORDER BY start ASC`)
     }
     groupBy = groupBy.replace("service", "service_name")
-    return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, ${groupBy} as group, COUNT(*) from "${tenant}"."logs" WHERE ${conditions} GROUP BY ${groupBy}, start ORDER BY start ASC`)
+    return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, ${groupBy} as group, COALESCE(COUNT(*), 0)::int AS count from "${tenant}"."logs" WHERE ${conditions} GROUP BY ${groupBy}, start ORDER BY start ASC`)
 }
 
 export async function getLogByLookup(lookup: string, tenant: string) {
