@@ -1,0 +1,1 @@
+CREATE INDEX "logs_attribute_idx" ON "template"."logs" USING gin ("attributes");
