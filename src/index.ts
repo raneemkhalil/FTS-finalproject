@@ -1,15 +1,15 @@
 import express from "express";
 import errorsHandling from "./middlewares/errors-handling.js";
-import errors from "./errors.js";
 import {getBearerToken} from "./utils/auth.js";
 import {config} from "./config.js";
 import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js";
-import {logValidations} from "./utils/log-validations.js";
+import {logValidations, result} from "./middlewares/log-validations.js";
 import {healthy, healthyCheck} from "./middlewares/healthy-app.js";
 import {LogReq} from "./z-types.js";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
 import crypto from "node:crypto";
 import {authCheck} from "./middlewares/auth-check.js";
+import {paramValidations} from "./middlewares/param-validations.js";
 
 
 export const app = express();
@@ -35,37 +35,24 @@ app.get("/health", healthyCheck, (req: express.Request, res: express.Response) =
     res.status(200).json({...healthy.details, info: "Server is ready to listen"})
 })
 
-app.get("/logs", authCheck, async (req: express.Request, res: express.Response) => {
+app.get("/logs", authCheck, paramValidations, async (req: express.Request, res: express.Response) => {
     let tenantName = config.default_tenant
     if(config.auth_enabled) {
         [tenantName] = getBearerToken(req)
     }
     const cursor = req.query.cursor as string
-    const limit = req.query.limit as string
-
-    let limitNum = limit ? Number(limit) : 100;
-    if (isNaN(limitNum)){
-        throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
-    }
+    let limit = req.query.limit as string ?? 100
 
     let date: string | null = null
     let type: "next" | "previous" = "next"
 
-    if (limitNum > 1000) {
-        throw new errors.BadRequestError("Maximum limit is 1000")
-    }
-
-    // check the validation of the cursor if exist
-    if (cursor && pointers.previous.cursor !== cursor && pointers.next.cursor !== cursor) {
-        throw new errors.BadRequestError("Invalid or malformed cursor!")
-    }
     // getting data due to cursor => date and type
     if (cursor) {
         date = pointers.previous.cursor === cursor ? pointers.previous.date : pointers.next.date
         type = pointers.previous.cursor === cursor ? pointers.previous.type : pointers.next.type
     }
 
-    let logs = await getLogs(date, type, limitNum + 1, tenantName, req)
+    let logs = await getLogs(date, type, Number(limit) + 1, tenantName, req)
 
     if (!logs[0]) {
         res.status(200).json({
@@ -79,7 +66,7 @@ app.get("/logs", authCheck, async (req: express.Request, res: express.Response) 
     }
 
     // setting prev and next urls in the response data
-    setPointersUrls(logs, limitNum, type, req.url)
+    setPointersUrls(logs, Number(limit), type, req.url)
 
     res.status(200).json({
         next: pointers.next.nextUrl,
@@ -112,23 +99,22 @@ app.get("/logs/:id", authCheck, async (req: express.Request, res: express.Respon
     res.status(200).json(log)
 })
 
-app.post("/logs", authCheck, async (req: express.Request, res: express.Response) => {
+app.post("/logs", authCheck, logValidations, async (req: express.Request, res: express.Response) => {
     let tenantName = config.default_tenant
     if(config.auth_enabled) {
         [tenantName] = getBearerToken(req)
     }
-    const result = logValidations(req)
 
     const body: {
         logs: []
     } = req.body
     let logs: LogReq = body.logs;
 
-    if (result.rejected.length > 0) {
-        logs = logs.filter((log, index) => !(index in result.count))
-    }
-
     const requestId = crypto.randomUUID()
+
+    if (Object.keys(result.countRejected).length > 0) {
+        logs = logs.filter((log, index) => !(index in result.countRejected))
+    }
 
     await createLog(requestId, logs, tenantName)
     res.status(200).json({

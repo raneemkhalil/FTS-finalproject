@@ -1,12 +1,15 @@
 import {LogReq, logSchema} from "../z-types.js";
 import express from "express";
 import errors from "../errors.js";
-import {Detail, result, SError} from "../types.js";
+import {Detail, Result, SError} from "../types.js";
+
+export let result: Result
 
 // check the validation of the response
-export function logValidations(req: express.Request): result {
+export function logValidations(req: express.Request, res: express.Response, next: express.NextFunction) {
     let jsonE
     let rejected: Detail[] = []
+    // the count of rejected logs
     let count: Record<number, number> = {};
 
     const contentType = req.header("Content-Type")
@@ -15,6 +18,10 @@ export function logValidations(req: express.Request): result {
     }
 
     const logs: LogReq[] = req.body.logs
+
+    if (logs.length === 0) {
+        throw new errors.BadRequestError("Empty data!")
+    }
 
     try {
         logSchema.parse(logs)
@@ -26,11 +33,13 @@ export function logValidations(req: express.Request): result {
     }
 
     if (!jsonE || typeof jsonE === "undefined") {
-        return {
+        result = {
             accepted: logs.length,
             rejected: [],
-            count: {}
+            countRejected: {}
         }
+        next()
+        return
     }
 
     // to know the count of rejected logs using count object
@@ -53,14 +62,15 @@ export function logValidations(req: express.Request): result {
         rejected.push(detail)
     }
 
-    const countOfRejected = logs.length - Object.keys(count).length
-    if (countOfRejected === 0) {
+    const countOfAccepted = logs.length - Object.keys(count).length
+    if (countOfAccepted === 0) {
         throw new errors.BadRequestError("Invalid logs!")
     }
 
-    return {
-        accepted: countOfRejected,
+    result = {
+        accepted: countOfAccepted,
         rejected: rejected,
-        count: count
+        countRejected: count
     }
+    next()
 }

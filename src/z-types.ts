@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import {Level} from "./db/queries/logs.js";
 
 
-const isoTimestamp = z.string().refine((s) => {
+export const isoTimestamp = z.string().refine((s) => {
     // strict ISO check; accepts e.g. 2023-08-01T12:34:56Z or with offset
     const dt = DateTime.fromISO(s, { setZone: true });
     const maxDateAllowed = DateTime.utc().plus({minutes: 5})

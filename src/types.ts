@@ -27,13 +27,13 @@ export type Detail = {
     index: number,
     reason: string
 }
-export type result = {
+export type Result = {
     accepted: number,
     rejected: {
         index: number,
         reason: string
     }[],
-    count: Record<number, number>
+    countRejected: Record<number, number>
 }
 export type Pointers = {
     next: {

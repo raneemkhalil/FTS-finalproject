@@ -10,7 +10,7 @@ export default function errorsHandling (err: Error, req: express.Request, res: e
         res.status(403).json({
             error: err.message
         })
-    } else if (err instanceof errors.BadRequestError) {
+    } else if (err instanceof errors.BadRequestError || err instanceof SyntaxError) {
         res.status(400).json({
             error: err.message
         })
