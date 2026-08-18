@@ -46,10 +46,12 @@ services:
     image: 2241998/fts-final:latest
     environment:
       SECRET: "tU0n5P1kUKv7MV2jafd+DfZfbSblLdxcElzgqHTofPQ="
-      PORT: "8081"
+      PORT: "8080"
       HOST: "db"
       AUTH_ENABLED: "false"
       LOADGEN_API_KEY:
+    ports:
+      - "8080:8080"
     depends_on:
       db-migrate:
         condition: service_completed_successfully
