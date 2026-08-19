@@ -3,6 +3,7 @@ import errors from "../errors.js";
 import {isoTimestamp} from "../z-types.js";
 import {Level} from "../db/queries/logs.js";
 import {decodeCursor} from "../db/utils/parse-cursor.js";
+import {preventInjectionSQL} from "./prevent-injection-sql.js";
 
 export async function paramValidations (req: express.Request, res: express.Response, next: express.NextFunction) {
     const cursor = req.query.cursor as string

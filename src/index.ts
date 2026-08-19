@@ -11,6 +11,7 @@ import crypto from "node:crypto";
 import {authCheck} from "./middlewares/auth-check.js";
 import {paramValidations} from "./middlewares/param-validations.js";
 import {decodeCursor} from "./db/utils/parse-cursor.js";
+import {preventInjectionSQL} from "./middlewares/prevent-injection-sql.js";
 
 
 export const app = express();
@@ -36,7 +37,7 @@ app.get("/health", healthyCheck, (req: express.Request, res: express.Response) =
     res.status(200).json({...healthy.details, info: "Server is ready to listen"})
 })
 
-app.get("/logs", authCheck, paramValidations, async (req: express.Request, res: express.Response) => {
+app.get("/logs", authCheck, preventInjectionSQL, paramValidations, async (req: express.Request, res: express.Response) => {
     let tenantName = config.default_tenant
     if(config.auth_enabled) {
         [tenantName] = getBearerToken(req)
@@ -78,7 +79,7 @@ app.get("/logs", authCheck, paramValidations, async (req: express.Request, res: 
     })
 })
 
-app.get("/logs/aggregate", authCheck, paramValidations, async (req: express.Request, res: express.Response) => {
+app.get("/logs/aggregate", authCheck, preventInjectionSQL, paramValidations, async (req: express.Request, res: express.Response) => {
     let tenant = config.default_tenant
     if(config.auth_enabled) {
         [tenant] = getBearerToken(req)
