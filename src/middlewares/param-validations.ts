@@ -23,7 +23,7 @@ export async function paramValidations (req: express.Request, res: express.Respo
     if (limit && Number(limit) > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
     }
-    if (limit && (Number(limit) < -1 || !Number.isInteger(Number(limit)))) {
+    if (limit && (Number(limit) < 1 || !Number.isInteger(Number(limit)))) {
         throw new errors.BadRequestError("Invalid limit")
     }
 
