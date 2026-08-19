@@ -95,6 +95,9 @@ export async function getLogsAggregation(req: express.Request, tenant: string) {
     if (!groupBy) {
         return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, null as group, COALESCE(COUNT(*), 0)::int AS count from "${tenant}"."logs" WHERE ${conditions} GROUP BY start ORDER BY start ASC`)
     }
+    if (groupBy && groupBy !== "level" && groupBy !== "service") {
+        throw new errors.BadRequestError("Group by should be level or service")
+    }
     groupBy = groupBy.replace("service", "service_name")
     return await db.execute(`SELECT to_timestamp(floor(extract(epoch FROM time) / ${epochSecondes}) * ${epochSecondes}) as start, ${groupBy} as group, COALESCE(COUNT(*), 0)::int AS count from "${tenant}"."logs" WHERE ${conditions} GROUP BY ${groupBy}, start ORDER BY start ASC`)
 }
