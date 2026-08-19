@@ -13,13 +13,17 @@ export async function paramValidations (req: express.Request, res: express.Respo
     const service = req.query.service as string
     const  q = req.query.q as string
 
-    if (limit && isNaN(Number(limit))){
+    if (!limit) {
+        throw new errors.BadRequestError(`Invalid Input: limit is empty`)
+    }
+
+    if (isNaN(Number(limit))){
         throw new errors.BadRequestError(`Invalid Input: limit is non-numeric`)
     }
-    if (limit && Number(limit) > 1000) {
+    if (Number(limit) > 1000) {
         throw new errors.BadRequestError("Maximum limit is 1000")
     }
-    if (limit && (Number(limit) < -1 || !Number.isInteger(Number(limit)))) {
+    if (Number(limit) < -1 || !Number.isInteger(Number(limit))) {
         throw new errors.BadRequestError("Invalid limit")
     }
 
