@@ -1,6 +1,6 @@
 import express from "express";
 import errors from "../errors.js";
-import {isoTimestamp} from "../z-types.js";
+import {isoTimestampParam} from "../z-types.js";
 import {Level} from "../db/queries/logs.js";
 import {decodeCursor} from "../db/utils/parse-cursor.js";
 
@@ -25,7 +25,7 @@ export async function paramValidations (req: express.Request, res: express.Respo
 
     if (since) {
         try {
-            isoTimestamp.parse(since)
+            isoTimestampParam.parse(since)
         } catch (e) {
             throw new errors.BadRequestError(`${e}`)
         }
@@ -33,7 +33,7 @@ export async function paramValidations (req: express.Request, res: express.Respo
 
     if (until) {
         try {
-            isoTimestamp.parse(until)
+            isoTimestampParam.parse(until)
         } catch (e) {
             throw new errors.BadRequestError(`${e}`)
         }
@@ -44,7 +44,7 @@ export async function paramValidations (req: express.Request, res: express.Respo
         const date = decodeCursor(cursor)
         if (date) {
             try {
-                isoTimestamp.parse(date)
+                isoTimestampParam.parse(date)
             } catch (e) {
                 throw new errors.BadRequestError(`${e}`)
             }

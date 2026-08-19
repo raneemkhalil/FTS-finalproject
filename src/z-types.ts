@@ -11,6 +11,12 @@ export const isoTimestamp = z.string().refine((s) => {
     return dt.isValid && validDate;
 }, { message: 'timestamp must be a valid ISO 8601 string and not more future than 5 min.' });
 
+export const isoTimestampParam = z.string().refine((s) => {
+    // strict ISO check; accepts e.g. 2023-08-01T12:34:56Z or with offset
+    const dt = DateTime.fromISO(s, { setZone: true });
+    return dt.isValid;
+}, { message: 'timestamp must be a valid ISO 8601 string and not more future than 5 min.' });
+
 const specific = refine(i => {
     if (typeof i === "object" && i !== null) {
         const values = Object.values(i)
