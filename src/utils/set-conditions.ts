@@ -1,6 +1,5 @@
 import express from "express";
 import errors from "../errors.js";
-import {sql} from "drizzle-orm";
 
 export function setConditions(req: express.Request, date: string | null, type: string | null) {
     const level = req.query.level as string
@@ -30,48 +29,48 @@ export function setConditions(req: express.Request, date: string | null, type: s
     attrKey = attrKey.split(".")[1]
     const jsonFilter = JSON.stringify({ [attrKey]: attrVal });
 
-    let conditions = []
+    let conditions: string[] = []
     if (!date && sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
+        conditions.push(`time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
     if (!date && sinceIsoStr && !untilIsoStr) {
-        conditions.push(sql`time >= '${sinceIsoStr}'`)
+        conditions.push(`time >= '${sinceIsoStr}'`)
     }
     if (!date && !sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time < '${untilIsoStr}'`)
+        conditions.push(`time < '${untilIsoStr}'`)
     }
     if (date && type === "next" && sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time < '${date}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
+        conditions.push(`time < '${date}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
     if (date && type === "next" && sinceIsoStr && !untilIsoStr) {
-        conditions.push(sql`time < '${date}' AND time >= '${sinceIsoStr}'`)
+        conditions.push(`time < '${date}' AND time >= '${sinceIsoStr}'`)
     }
     if (date && type === "next" && !sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time < '${date}' AND time < '${untilIsoStr}'`)
+        conditions.push(`time < '${date}' AND time < '${untilIsoStr}'`)
     }
     if (date && type === "previous" && sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time > '${date}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
+        conditions.push(`time > '${date}' AND time >= '${sinceIsoStr}' AND time < '${untilIsoStr}'`)
     }
     if (date && type === "previous" && sinceIsoStr && !untilIsoStr) {
-        conditions.push(sql`time > '${date}' AND time >= '${sinceIsoStr}'`)
+        conditions.push(`time > '${date}' AND time >= '${sinceIsoStr}'`)
     }
     if (date && type === "previous" && !sinceIsoStr && untilIsoStr) {
-        conditions.push(sql`time > '${date}' AND time < '${untilIsoStr}'`)
+        conditions.push(`time > '${date}' AND time < '${untilIsoStr}'`)
     }
     if (date && type === "next") {
-        conditions.push(sql`time < '${date}'`)
+        conditions.push(`time < '${date}'`)
     }
     if (date && type === "previous") {
-        conditions.push(sql`time > '${date}'`)
+        conditions.push(`time > '${date}'`)
     }
     if (level) {
-        conditions.push(sql`level = '${level}'`)
+        conditions.push(`level = '${level}'`)
     }
     if (service) {
-        conditions.push(sql`service_name = '${service}'`)
+        conditions.push(`service_name = '${service}'`)
     }
     if (q) {
-        conditions.push(sql`message LIKE '%${q}%'`)
+        conditions.push(`message LIKE '%${q}%'`)
     }
     if (attrVal) {
         conditions.push(`attributes @> '${jsonFilter}'::jsonb`)

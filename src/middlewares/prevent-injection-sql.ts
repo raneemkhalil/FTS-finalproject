@@ -17,12 +17,6 @@ export function preventInjectionSQL(req: express.Request, res: express.Response,
                 throw new errors.BadRequestError(`Invalid attribute value format: '${val}'`);
             }
         }
-        if (!/^[a-zA-Z0-9_\-\.]+$/.test(key)) {
-            throw new errors.BadRequestError(`Invalid ${key}`);
-        }
-        if (!/^[a-zA-Z0-9_\-\.]+$/.test(val as string)) {
-            throw new errors.BadRequestError(`Invalid ${key === 'q' ? 'message' : key} value format: '${val}'`);
-        }
     }
     next()
 }

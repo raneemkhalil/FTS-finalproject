@@ -14,20 +14,11 @@ export const isoTimestamp = z.string().refine((s) => {
 const specific = refine(i => {
     if (typeof i === "object" && i !== null) {
         const values = Object.values(i)
-        const keys = Object.keys(i)
         let bool = true
         for (let value of values) {
             bool = typeof value === "number" || typeof value === "string" || typeof value === "boolean"
-            if (typeof value === "string" && !/^[a-zA-Z0-9_\-\.]+$/.test(value)) {
-                return false
-            }
             if (!bool) {
                 return bool
-            }
-        }
-        for (let key of keys) {
-            if (!/^[a-zA-Z0-9_\-\.]+$/.test(key)) {
-                return false
             }
         }
         return bool
