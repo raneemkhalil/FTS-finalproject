@@ -27,7 +27,7 @@ export function logsTable(tenant_name: string) {
         message: text("message"),
         attributes: jsonb("attributes").notNull().default(sql`'{}'::jsonb`),
     }, (t) => [
-        index("logs_attribute_idx").using("gin", t.attributes),
+        index("logs_attribute_idx").using("gin", t.attributes).with({fastupdate: true}),
         primaryKey({name: "logs_pk", columns: [t.requestId, t.time, t.serviceName]})
     ]);
 }

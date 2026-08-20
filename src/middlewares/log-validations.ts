@@ -1,9 +1,7 @@
 import {LogReq, logSchema} from "../z-types.js";
 import express from "express";
 import errors from "../errors.js";
-import {Detail, Result, SError} from "../types.js";
-
-export let result: Result
+import {Detail, SError} from "../types.js";
 
 // check the validation of the response
 export function logValidations(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -33,7 +31,7 @@ export function logValidations(req: express.Request, res: express.Response, next
     }
 
     if (!jsonE || typeof jsonE === "undefined") {
-        result = {
+        res.locals.validationResult = {
             accepted: logs.length,
             rejected: [],
             countRejected: {}
@@ -67,7 +65,7 @@ export function logValidations(req: express.Request, res: express.Response, next
         throw new errors.BadRequestError("Invalid logs!")
     }
 
-    result = {
+    res.locals.validationResult = {
         accepted: countOfAccepted,
         rejected: rejected,
         countRejected: count

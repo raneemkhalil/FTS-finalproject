@@ -2,8 +2,8 @@ import express from "express";
 import errorsHandling from "./middlewares/errors-handling.js";
 import {getBearerToken} from "./utils/auth.js";
 import {config} from "./config.js";
-import {createLog, getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js";
-import {logValidations, result} from "./middlewares/log-validations.js";
+import {getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js";
+import {logValidations} from "./middlewares/log-validations.js";
 import {healthy, healthyCheck} from "./middlewares/healthy-app.js";
 import {LogReq} from "./z-types.js";
 import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
@@ -12,6 +12,7 @@ import {authCheck} from "./middlewares/auth-check.js";
 import {paramValidations} from "./middlewares/param-validations.js";
 import {decodeCursor} from "./db/utils/parse-cursor.js";
 import {preventInjectionSQL} from "./middlewares/prevent-injection-sql.js";
+import {logQueue} from "./db/queries/log-queue.js";
 
 
 export const app = express();
@@ -114,14 +115,15 @@ app.post("/logs", authCheck, logValidations, async (req: express.Request, res: e
 
     const requestId = crypto.randomUUID()
 
-    if (Object.keys(result.countRejected).length > 0) {
-        logs = logs.filter((log, index) => !(index in result.countRejected))
+    if (Object.keys(res.locals.validationResult.countRejected).length > 0) {
+        logs = logs.filter((_, index) => !(index in res.locals.validationResult.countRejected))
     }
 
-    await createLog(requestId, logs, tenantName)
+    // Push into queue asynchronously without awaiting database
+    logQueue.push(requestId, logs, tenantName);
     res.status(200).json({
-        accepted: result.accepted,
-        rejected: result.rejected
+        accepted: res.locals.validationResult.accepted,
+        rejected: res.locals.validationResult.rejected
     })
 })
 

@@ -5,10 +5,8 @@ import {Level} from "./db/queries/logs.js";
 
 export const isoTimestamp = z.string().refine((s) => {
     // strict ISO check; accepts e.g. 2023-08-01T12:34:56Z or with offset
-    const dt = DateTime.fromISO(s, { setZone: true });
-    const maxDateAllowed = DateTime.utc().plus({minutes: 5})
-    const validDate = dt <= maxDateAllowed
-    return dt.isValid && validDate;
+    const time = Date.parse(s);
+    return !isNaN(time) && time <= Date.now() + 300000;
 }, { message: 'timestamp must be a valid ISO 8601 string and not more future than 5 min.' });
 
 export const isoTimestampParam = z.string().refine((s) => {
