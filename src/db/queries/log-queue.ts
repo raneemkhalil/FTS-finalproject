@@ -18,7 +18,7 @@ class LogQueue {
     private queue: QueuedLog[] = [];
     private isFlushing = false;
     private readonly BATCH_SIZE = 3000;
-    private readonly FLUSH_INTERVAL_MS = 50; // Flush every 50ms or when batch size reached
+    private readonly FLUSH_INTERVAL_MS = 10; // Flush every 10ms or when batch size reached
 
     constructor() {
         this.startTimer();

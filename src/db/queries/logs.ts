@@ -49,7 +49,7 @@ export async function createLog(requestId: string, logsList: LogReq, tenant: str
     }
 }
 
-export async function getLogs(date: string | null, type: string, limit: number, tenant: string, req: express.Request) {
+export async function getLogs(date: string | null, type: string | null, limit: number, tenant: string, req: express.Request) {
     let res: LogResponse[];
     let conditions = setConditions(req, date, type);
 

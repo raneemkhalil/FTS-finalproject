@@ -45,7 +45,7 @@ export async function paramValidations (req: express.Request, res: express.Respo
 
     // check the validation of the cursor if exist
     if (cursor) {
-        const date = decodeCursor(cursor)
+        const [date, type] = decodeCursor(cursor)
         if (date) {
             try {
                 isoTimestampParam.parse(date)
@@ -53,6 +53,9 @@ export async function paramValidations (req: express.Request, res: express.Respo
                 throw new errors.BadRequestError(`${e}`)
             }
         } else {
+            throw new errors.BadRequestError("Invalid cursor")
+        }
+        if (!type || (type !== "next" && type !== "previous")) {
             throw new errors.BadRequestError("Invalid cursor")
         }
     }

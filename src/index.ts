@@ -6,7 +6,7 @@ import {getLogByLookup, getLogs, getLogsAggregation} from "./db/queries/logs.js"
 import {logValidations} from "./middlewares/log-validations.js";
 import {healthy, healthyCheck} from "./middlewares/healthy-app.js";
 import {LogReq} from "./z-types.js";
-import {pointers, setPointersUrls} from "./utils/set-pointers-urls.js";
+import {setPointersUrls} from "./utils/set-pointers-urls.js";
 import crypto from "node:crypto";
 import {authCheck} from "./middlewares/auth-check.js";
 import {paramValidations} from "./middlewares/param-validations.js";
@@ -47,12 +47,11 @@ app.get("/logs", authCheck, preventInjectionSQL, paramValidations, async (req: e
     let limit = req.query.limit as string ?? 100
 
     let date: string | null = null
-    let type: "next" | "previous" = "next"
+    let type: string | null = null
 
     // getting data due to cursor => date and type
     if (cursor) {
-        date = decodeCursor(cursor)
-        type = pointers.previous.cursor === cursor ? pointers.previous.type : pointers.next.type
+        [date, type] = decodeCursor(cursor)
     }
 
     let logs = await getLogs(date, type, Number(limit) + 1, tenantName, req)
@@ -69,14 +68,14 @@ app.get("/logs", authCheck, preventInjectionSQL, paramValidations, async (req: e
     }
 
     // setting prev and next urls in the response data
-    setPointersUrls(logs, Number(limit), type, req.url)
+    const[prevUrl, nextCursor, nextUrl] = setPointersUrls(logs, Number(limit), type, req.url)
 
     res.status(200).json({
-        next: pointers.next.nextUrl,
-        previous: pointers.previous.prevUrl,
+        next: nextUrl,
+        previous: prevUrl,
         count: logs.length,
         logs: logs,
-        next_cursor: pointers.next.cursor
+        next_cursor: nextCursor
     })
 })
 
