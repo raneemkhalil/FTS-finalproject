@@ -194,7 +194,7 @@ http://localhost:8080
 - **`GET /logs`**
 - **Query Parameters**:
   - `limit` *(optional, integer)*: Maximum logs to return (default: `100`, max: `1000`).
-  - `cursor` *(optional, string)*: Hex-encoded timestamp cursor for pagination.
+  - `cursor` *(optional, string)*: Hex-encoded timestamp and type cursor for pagination.
   - `since` *(optional, ISO string)*: Lower time boundary (`time >= since`).
   - `until` *(optional, ISO string)*: Upper time boundary (`time < until`).
   - `level` *(optional, string)*: Filter by level (`debug`, `info`, `warn`, `error`).
