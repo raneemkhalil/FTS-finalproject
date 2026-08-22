@@ -492,14 +492,18 @@ The test suite evaluates four core pillars under heavy load: **Correctness**, **
 #### Benchmark Run 2 (Optimized)
 ![Methodology Test - Run 2](./assets/load-test-run-2.png)
 
+#### Benchmark Run 3 (Final Result)
+![Final Benchmark Result](./assets/final-result.png)
+
 #### Test Output Breakdown
 
-| Metric Pillar | Run 1 Score / Result | Run 2 Score / Result | Key Observations |
-| :--- | :--- | :--- | :--- |
-| **Performance** | `38.3 / 50` | `42.0 / 50` | Sustained **~15,000 logs/sec** ingestion throughput with **0.0% errors**; ingestion p95 reduced from **699ms** to **369ms**. |
-| **Queries** | `0.0 / 15` (p95: 651ms) | `4.2 / 15` (p95: 268ms) | Time-bucketed aggregation p95 latency improved by **58.8%** down to **268ms**. |
-| **Reliability** | `20.0 / 20` (4/4) | `20.0 / 20` (4/4) | **100% pass rate** across all failure, load-spike, and concurrency scenarios. |
-| **Correctness** | `10.0 / 15` (10/15) | `10.0 / 15` (10/15) | Passed 10/15 validation checks under heavy concurrent write load. |
+| Metric Pillar | Run 1 Score | Run 2 Score | Final Result | Key Observations |
+| :--- | :--- | :--- | :--- | :--- |
+| **Performance** | `38.3 / 50` | `42.0 / 50` | `47.5 / 50` | Sustained **15,000 logs/sec** ingestion with **0.0% errors**; ingestion p95 reduced to **2ms**. |
+| **Queries** | `0.0 / 15` (p95: 651ms) | `4.2 / 15` (p95: 268ms) | `8.6 / 15` (p95: 24ms) | Time-bucketed aggregation p95 latency drastically improved down to **24ms**. |
+| **Reliability** | `20.0 / 20` (4/4) | `20.0 / 20` (4/4) | `20.0 / 20` (4/4) | **100% pass rate** across all failure, load-spike, and concurrency scenarios. |
+| **Correctness** | `10.0 / 15` (10/15) | `10.0 / 15` (10/15) | `15.0 / 15` (15/15) | **100% pass rate** across all 15 correctness catalog checks. |
+| **Total Score** | `68.3 / 100` | `76.2 / 100` | **`91.1 / 100`** | Overall benchmark score reached **91.1 / 100**. |
 
 ---
 
